@@ -11,7 +11,7 @@ set(QT_USE_QTXML TRUE)
 include(${QT_USE_FILE})
 
 include_directories(${KDE4_INCLUDES} ${LIBSPOTIFY_INCLUDE_DIR} ${LIBLASTFM_INCLUDE_DIR})
- 
+
 set(spokify_SRCS
     login.cpp
     main.cpp
@@ -34,6 +34,12 @@ set(spokify_SRCS
     fht.cpp
     blockanalyzer.cpp
     lyricswidget.cpp)
+
+set(LIBSPOKIFY_DIR libspokify)
+
+list(APPEND spokify_SRCS
+    ${LIBSPOKIFY_DIR}/Error.cpp
+    ${LIBSPOKIFY_DIR}/Session.cpp)
  
 kde4_add_executable(spokify ${spokify_SRCS})
  

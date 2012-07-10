@@ -30,6 +30,9 @@
 #include "scrobbler.h"
 #include "lyricswidget.h"
 
+#include "libspokify/Session.h"
+#include "libspokify/Error.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QTimer>
 #include <QtCore/QBuffer>
@@ -539,9 +542,9 @@ namespace SpotifySearch {
 
         const int res = sp_search_total_tracks(result);
 #if SPOTIFY_API_VERSION >= 12
-        sp_search_create(MainWindow::self()->session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::searchComplete, userdata);
+        sp_search_create(libspokify::Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::searchComplete, userdata);
 #else
-        sp_search_create(MainWindow::self()->session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, &SpotifySearch::searchComplete, userdata);
+        sp_search_create(libspokify::Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, &SpotifySearch::searchComplete, userdata);
 #endif
     }
 
@@ -637,15 +640,11 @@ MainWindow::MainWindow(QWidget *parent)
         m_config.user_agent = "spokify";
         m_config.callbacks = &SpotifySession::spotifyCallbacks;
 
-#if SPOTIFY_API_VERSION > 4
-        sp_error error = sp_session_create(&m_config, &m_session);
-        if (error != SP_ERROR_OK) {
-            KMessageBox::error(this, i18n("Couldn't create Spotify session.\n\nThe error message is \"%1\".\n\nPlease try again. If the problem persists contact the developers.", sp_error_message(error)), i18n("A critical error happened"));
+        libspokify::Session session(m_config);
+        if (!session.isInitialized()) {
+            KMessageBox::error(this, i18n("Couldn't create Spotify session.\n\nThe error message is \"%1\".\n\nPlease try again. If the problem persists contact the developers.", session.initializationError().description()), i18n("A critical error happened"));
             return;
         }
-#else
-        sp_session_init(&m_config, &m_session);
-#endif
     }
     //END: Spotify session init
 
@@ -735,11 +734,11 @@ MainWindow::~MainWindow()
     m_isExiting = true;
     m_pcmWaitCondition.wakeAll();
     if (m_loggedIn) {
-        sp_session_logout(m_session);
+        sp_session_logout(libspokify::Session().session());
     }
 #if SPOTIFY_API_VERSION > 4
-    if (m_session) {
-        sp_session_release(m_session);
+    if (libspokify::Session().session()) {
+        sp_session_release(libspokify::Session().session());
     }
 #endif
 }
@@ -754,14 +753,9 @@ bool MainWindow::isExiting() const
     return m_isExiting;
 }
 
-sp_session *MainWindow::session() const
-{
-    return m_session;
-}
-
 sp_playlistcontainer *MainWindow::playlistContainer() const
 {
-    return sp_session_playlistcontainer(m_session);
+    return sp_session_playlistcontainer(libspokify::Session().session());
 }
 
 MainWindow *MainWindow::self()
@@ -911,7 +905,7 @@ void MainWindow::endOfTrack()
 void MainWindow::fillPlaylistModel()
 {
     if (!m_pc) {
-        m_pc = sp_session_playlistcontainer(m_session);
+        m_pc = sp_session_playlistcontainer(libspokify::Session().session());
         sp_playlistcontainer_add_callbacks(m_pc, &SpotifyPlaylistContainer::spotifyCallbacks, this);
     }
 
@@ -934,7 +928,7 @@ void MainWindow::fillPlaylistModel()
 
     // Add the special playlist for starred tracks
     {
-        sp_playlist *pl = sp_session_starred_create(m_session);
+        sp_playlist *pl = sp_session_starred_create(libspokify::Session().session());
         Q_ASSERT(pl);
         if (pl == m_currentPlaylist) {
             currRow = 0;
@@ -999,7 +993,7 @@ void MainWindow::notifyMainThread()
 {
     int timeout;
     do {
-        sp_session_process_events(m_session, &timeout);
+        sp_session_process_events(libspokify::Session().session(), &timeout);
     } while (!timeout);
     QTimer::singleShot(timeout, this, SLOT(notifyMainThread()));
 }
@@ -1032,7 +1026,7 @@ void MainWindow::logoutSlot()
     m_logout->setEnabled(false);
 
     //BEGIN: Spotify logout
-    sp_session_logout(m_session);
+    sp_session_logout(libspokify::Session().session());
     //END: Spotify logout
 
     QTimer::singleShot(0, this, SLOT(clearAllWidgets()));
@@ -1101,9 +1095,9 @@ void MainWindow::performSearch()
     }
 
 #if SPOTIFY_API_VERSION >= 12
-    sp_search_create(m_session, query.toUtf8().data(), 0, 1, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::dummySearchComplete, new QString(query));
+    sp_search_create(libspokify::Session().session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::dummySearchComplete, new QString(query));
 #else
-    sp_search_create(m_session, query.toUtf8().data(), 0, 1, 0, 0, 0, 0, &SpotifySearch::dummySearchComplete, new QString(query));
+    sp_search_create(libspokify::Session().session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, &SpotifySearch::dummySearchComplete, new QString(query));
 #endif
 }
 
@@ -1180,9 +1174,9 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
             const QModelIndex &index = trackModel->index(i, TrackModel::SpotifyNativeTrackRole);
 
 #if SPOTIFY_API_VERSION < 10
-            if (!sp_track_is_available(session(), trackModel->data(index).value<sp_track*>())) {
+            if (!sp_track_is_available(libspokify::Session().session(), trackModel->data(index).value<sp_track*>())) {
 #else
-            if (sp_track_get_availability(session(), trackModel->data(index).value<sp_track*>()) != SP_TRACK_AVAILABILITY_AVAILABLE) {
+            if (sp_track_get_availability(libspokify::Session().session(), trackModel->data(index).value<sp_track*>()) != SP_TRACK_AVAILABILITY_AVAILABLE) {
 #endif
                 trackModel->removeRow(i);
             }
@@ -1219,7 +1213,7 @@ void MainWindow::seekPosition(int position)
     }
     snd_pcm_prepare(m_snd);
     m_pcmMutex.unlock();
-    sp_session_player_seek(m_session, position);
+    sp_session_player_seek(libspokify::Session().session(), position);
 }
 
 void MainWindow::currentTrackFinishedSlot()
@@ -1399,10 +1393,10 @@ void MainWindow::play(sp_track *tr)
 #else
     const byte *image = sp_album_cover(album);
 #endif
-    sp_image *const cover = sp_image_create(m_session, image);
+    sp_image *const cover = sp_image_create(libspokify::Session().session(), image);
     sp_image_add_load_callback(cover, &SpotifyImage::imageLoaded, tr);
-    sp_session_player_load(m_session, tr);
-    sp_session_player_play(m_session, true);
+    sp_session_player_load(libspokify::Session().session(), tr);
+    sp_session_player_play(libspokify::Session().session(), true);
     m_mainWidget->setTotalTrackTime(sp_track_duration(tr));
 
     // Set the currently playing song
@@ -1448,8 +1442,8 @@ void MainWindow::clearSoundQueue()
 {
     m_dataMutex.lock();
     if (isPlaying()) {
-        sp_session_player_play(m_session, false);
-        sp_session_player_unload(m_session);
+        sp_session_player_play(libspokify::Session().session(), false);
+        sp_session_player_unload(libspokify::Session().session());
         m_pcmMutex.lock();
         snd_pcm_drop(m_snd);
         m_pcmMutex.unlock();

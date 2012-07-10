@@ -20,6 +20,7 @@
 #include "mimedata.h"
 #include "mainwindow.h"
 #include "playlistmodel.h"
+#include "libspokify/Session.h"
 
 #include <libspotify/api.h>
 
@@ -81,7 +82,7 @@ void PlaylistView::dropEvent(QDropEvent *event)
     const MimeData *mimeData = static_cast<const MimeData*>(event->mimeData());
     sp_track* const trackToAdd[] = { mimeData->track() };
     sp_playlist *targetPlaylist = target.data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
-    sp_playlist_add_tracks(targetPlaylist, trackToAdd, 1, sp_playlist_num_tracks(targetPlaylist), MainWindow::self()->session());
+    sp_playlist_add_tracks(targetPlaylist, trackToAdd, 1, sp_playlist_num_tracks(targetPlaylist), libspokify::Session().session());
 }
 
 void PlaylistView::contextMenuEvent(QContextMenuEvent *event)

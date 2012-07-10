@@ -21,8 +21,6 @@
 
 #include <KDialog>
 
-class MainWindow;
-
 class QCheckBox;
 
 class KLineEdit;
@@ -37,7 +35,7 @@ class Login
     Q_OBJECT
 
 public:
-    Login(MainWindow *mainWindow);
+    explicit Login(QWidget *parent = 0);
     virtual ~Login();
 
     virtual void accept();
@@ -52,7 +50,6 @@ private:
     KLineEdit       *m_username;
     KLineEdit       *m_password;
     QCheckBox       *m_remember;
-    MainWindow      *m_mainWindow;
     KWallet::Wallet *m_wallet;
 };
  

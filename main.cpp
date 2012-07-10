@@ -22,6 +22,7 @@
 #include <KUniqueApplication>
  
 #include "mainwindow.h"
+#include "libspokify/Session.h"
 
 int main(int argc, char **argv)
 {
@@ -45,7 +46,7 @@ int main(int argc, char **argv)
     KGlobal::activeComponent().setAboutData(aboutData);
 
     MainWindow *window = new MainWindow();
-    if (window->session() == NULL) {
+    if (!libspokify::Session().isInitialized()) {
         delete window;
         return EXIT_FAILURE;
     }

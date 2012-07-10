@@ -17,7 +17,9 @@
  */
 
 #include "login.h"
-#include "mainwindow.h"
+#include "libspokify/Session.h"
+
+#include "libspotify/api.h"
 
 #include <QtGui/QLabel>
 #include <QtGui/QCheckBox>
@@ -27,12 +29,11 @@
 #include <KLineEdit>
 #include <kwallet.h>
 
-Login::Login(MainWindow *mainWindow)
-    : KDialog(mainWindow)
+Login::Login(QWidget *parent)
+    : KDialog(parent)
     , m_username(new KLineEdit(this))
     , m_password(new KLineEdit(this))
     , m_remember(new QCheckBox(i18n("Remember me"), this))
-    , m_mainWindow(mainWindow)
 {
     setWindowTitle(i18n("Login"));
     setButtons(KDialog::Ok | KDialog::Cancel);
@@ -95,7 +96,7 @@ void Login::showEvent(QShowEvent *event)
 void Login::loginSlot()
 {
     //BEGIN: Spotify login
-    sp_session_login(m_mainWindow->session(), m_username->text().toLatin1(),
+    sp_session_login(libspokify::Session().session(), m_username->text().toLatin1(),
                      m_password->text().toLatin1(), true
 #if SPOTIFY_API_VERSION >= 11
                      , NULL

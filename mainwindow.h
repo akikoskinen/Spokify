@@ -70,7 +70,6 @@ public:
 
     bool isExiting() const;
 
-    sp_session *session() const;
     sp_playlistcontainer *playlistContainer() const;
 
     static MainWindow *self();
@@ -180,7 +179,6 @@ private:
     bool                  m_isExiting;
 
     sp_session_config     m_config;
-    sp_session           *m_session;
     sp_playlistcontainer *m_pc;
 
     sp_playlist          *m_currentPlaylist;
