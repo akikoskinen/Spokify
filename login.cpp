@@ -19,8 +19,6 @@
 #include "login.h"
 #include "libspokify/Session.h"
 
-#include "libspotify/api.h"
-
 #include <QtGui/QLabel>
 #include <QtGui/QCheckBox>
 #include <QtGui/QFormLayout>
@@ -96,11 +94,6 @@ void Login::showEvent(QShowEvent *event)
 void Login::loginSlot()
 {
     //BEGIN: Spotify login
-    sp_session_login(libspokify::Session().session(), m_username->text().toLatin1(),
-                     m_password->text().toLatin1(), true
-#if SPOTIFY_API_VERSION >= 11
-                     , NULL
-#endif
-                     );
+    libspokify::Session().login(m_username->text(), m_password->text());
     //END: Spotify login
 }

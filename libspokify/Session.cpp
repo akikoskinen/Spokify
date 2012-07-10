@@ -96,6 +96,16 @@ Error Session::initializationError() const {
     return m_initializationError;
 }
 
+Error Session::login(const QString &username, const QString &password) {
+    sp_session_login(session(), username.toLatin1(), password.toLatin1(), true
+#if SPOTIFY_API_VERSION >= 11
+                     , NULL
+#endif
+                     );
+
+    return Error();
+}
+
 sp_session* Session::session() const {
     return m_session;
 }

@@ -42,6 +42,9 @@ public:
 
     Error initializationError() const;
 
+    // Currently returns no error
+    Error login(const QString &username, const QString &password);
+
     sp_session* session() const;
 
 };
