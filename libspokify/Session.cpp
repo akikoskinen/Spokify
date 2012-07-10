@@ -29,10 +29,60 @@ private:
 static sp_session *m_session = 0;
 static SessionError m_initializationError;
 
-Session::Session(sp_session_config &config) {
+
+Session::Config::Config(const QByteArray &applicationKey, const QString &userAgent, const sp_session_callbacks* callbacks) :
+    m_applicationKey(applicationKey),
+    m_userAgant(userAgent),
+    m_callbacks(callbacks)
+{
+}
+
+void Session::Config::setCacheLocation(const QString &dir) {
+    m_cacheLocation = dir;
+}
+
+void Session::Config::setSettingsLocation(const QString &dir) {
+    m_settingsLocation = dir;
+}
+
+QByteArray Session::Config::applicationKey() const {
+    return m_applicationKey;
+}
+
+QString Session::Config::userAgent() const {
+    return m_userAgant;
+}
+
+const sp_session_callbacks* Session::Config::callbacks() const {
+    return m_callbacks;
+}
+
+QString Session::Config::cacheLocation() const {
+    return m_cacheLocation;
+}
+
+QString Session::Config::settingsLocation() const {
+    return m_settingsLocation;
+}
+
+
+Session::Session(Config &config) {
     Q_ASSERT(m_session == 0);
 
-    m_initializationError.setError(sp_session_create(&config, &m_session));
+    sp_session_config sessionConfig;
+    memset(&sessionConfig, 0, sizeof(sessionConfig));
+    sessionConfig.api_version = SPOTIFY_API_VERSION;
+    QByteArray cacheLocation(config.cacheLocation().toUtf8());
+    sessionConfig.cache_location = cacheLocation.constData();
+    QByteArray settingsLocation(config.settingsLocation().toUtf8());
+    sessionConfig.settings_location = settingsLocation.constData();
+    sessionConfig.application_key = config.applicationKey().constData();
+    sessionConfig.application_key_size = config.applicationKey().size();
+    QByteArray userAgent(config.userAgent().toUtf8());
+    sessionConfig.user_agent = userAgent.constData();
+    sessionConfig.callbacks = config.callbacks();
+
+    m_initializationError.setError(sp_session_create(&sessionConfig, &m_session));
 }
 
 Session::Session() {

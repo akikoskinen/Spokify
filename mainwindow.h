@@ -178,7 +178,6 @@ private:
     SoundFeeder          *m_soundFeeder;
     bool                  m_isExiting;
 
-    sp_session_config     m_config;
     sp_playlistcontainer *m_pc;
 
     sp_playlist          *m_currentPlaylist;

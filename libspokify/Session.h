@@ -4,7 +4,7 @@
 #include <QString>
 
 struct sp_session;
-struct sp_session_config;
+struct sp_session_callbacks;
 
 #include "Error.h"
 
@@ -12,7 +12,30 @@ namespace libspokify {
 
 class Session {
 public:
-    Session(sp_session_config &config);
+    class Config {
+    public:
+        Config(const QByteArray &applicationKey, const QString &userAgent, const sp_session_callbacks* callbacks);
+
+        void setCacheLocation(const QString &dir);
+
+        void setSettingsLocation(const QString &dir);
+
+        QByteArray applicationKey() const;
+        QString userAgent() const;
+        const sp_session_callbacks* callbacks() const;
+        QString cacheLocation() const;
+        QString settingsLocation() const;
+
+    private:
+        QByteArray m_applicationKey;
+        QString m_userAgant;
+        const sp_session_callbacks* m_callbacks;
+        QString m_cacheLocation;
+        QString m_settingsLocation;
+    };
+
+
+    Session(Config &config);
     Session();
 
     bool isInitialized() const;
