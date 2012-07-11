@@ -729,12 +729,15 @@ MainWindow::~MainWindow()
 {
     m_isExiting = true;
     m_pcmWaitCondition.wakeAll();
+
+    libspokify::Session session;
+
     if (m_loggedIn) {
-        sp_session_logout(libspokify::Session().session());
+        session.logout();
     }
 #if SPOTIFY_API_VERSION > 4
-    if (libspokify::Session().session()) {
-        sp_session_release(libspokify::Session().session());
+    if (session.isInitialized()) {
+        sp_session_release(session.session());
     }
 #endif
 }
@@ -1022,7 +1025,7 @@ void MainWindow::logoutSlot()
     m_logout->setEnabled(false);
 
     //BEGIN: Spotify logout
-    sp_session_logout(libspokify::Session().session());
+    libspokify::Session().logout();
     //END: Spotify logout
 
     QTimer::singleShot(0, this, SLOT(clearAllWidgets()));

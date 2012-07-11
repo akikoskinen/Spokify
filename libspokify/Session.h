@@ -45,6 +45,9 @@ public:
     // Currently returns no error
     Error login(const QString &username, const QString &password);
 
+    // Currently returns no error
+    Error logout();
+
     sp_session* session() const;
 
 };

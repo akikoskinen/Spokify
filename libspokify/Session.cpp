@@ -106,6 +106,12 @@ Error Session::login(const QString &username, const QString &password) {
     return Error();
 }
 
+Error Session::logout() {
+    sp_session_logout(session());
+
+    return Error();
+}
+
 sp_session* Session::session() const {
     return m_session;
 }
