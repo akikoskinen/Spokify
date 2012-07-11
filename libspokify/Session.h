@@ -48,6 +48,9 @@ public:
     // Currently returns no error
     Error logout();
 
+    // Currently returns no error
+    Error destroy();
+
     sp_session* session() const;
 
 };

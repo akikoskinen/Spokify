@@ -112,6 +112,15 @@ Error Session::logout() {
     return Error();
 }
 
+Error Session::destroy() {
+    if (isInitialized()) {
+        sp_session_release(session());
+        m_session = 0;
+    }
+
+    return Error();
+}
+
 sp_session* Session::session() const {
     return m_session;
 }

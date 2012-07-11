@@ -735,10 +735,9 @@ MainWindow::~MainWindow()
     if (m_loggedIn) {
         session.logout();
     }
+
 #if SPOTIFY_API_VERSION > 4
-    if (session.isInitialized()) {
-        sp_session_release(session.session());
-    }
+    session.destroy();
 #endif
 }
 
