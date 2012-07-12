@@ -65,238 +65,7 @@
 
 MainWindow *MainWindow::s_self = 0;
 
-//BEGIN: SpotifySession - application bridge
-namespace SpotifySession {
-
-    static void loggedIn(sp_session *session, sp_error error)
-    {
-        Q_UNUSED(session);
-
-        if (error == SP_ERROR_OK) {
-            MainWindow::self()->spotifyLoggedIn();
-            return;
-        }
-        MainWindow::self()->restoreStatusBarSlot();
-        MainWindow::self()->actionCollection()->action("login")->setEnabled(true);
-        switch (error) {
-            case SP_ERROR_BAD_API_VERSION:
-            case SP_ERROR_API_INITIALIZATION_FAILED:
-#if SPOTIFY_API_VERSION < 9
-            case SP_ERROR_RESOURCE_NOT_LOADED:
-#endif
-            case SP_ERROR_BAD_APPLICATION_KEY:
-            case SP_ERROR_CLIENT_TOO_OLD:
-            case SP_ERROR_BAD_USER_AGENT:
-            case SP_ERROR_MISSING_CALLBACK:
-            case SP_ERROR_INVALID_INDATA:
-            case SP_ERROR_INDEX_OUT_OF_RANGE:
-            case SP_ERROR_OTHER_TRANSIENT:
-            case SP_ERROR_IS_LOADING:
-                KMessageBox::sorry(MainWindow::self(), i18n("An internal error happened with error code (%1).\n\nPlease, report this bug.", error),
-                                   i18n("A critical error happened"));
-                break;
-            case SP_ERROR_BAD_USERNAME_OR_PASSWORD:
-                KMessageBox::sorry(MainWindow::self(), i18n("Invalid username or password"),
-                                   i18n("Invalid username or password"));
-                break;
-            case SP_ERROR_USER_BANNED:
-                KMessageBox::sorry(MainWindow::self(), i18n("This user has been banned"),
-                                   i18n("User banned"));
-                break;
-            case SP_ERROR_UNABLE_TO_CONTACT_SERVER:
-                KMessageBox::sorry(MainWindow::self(), i18n("Cannot connect to server"),
-                                   i18n("Cannot connect to server"));
-                break;
-            case SP_ERROR_OTHER_PERMANENT:
-                KMessageBox::sorry(MainWindow::self(), i18n("Something wrong happened.\n\nWhatever it is, it is permanent."),
-                                   i18n("Something wrong happened"));
-                break;
-            case SP_ERROR_USER_NEEDS_PREMIUM:
-                KMessageBox::sorry(MainWindow::self(), i18n("You need to be a Premium User in order to login"),
-                                   i18n("Premium User access required"));
-                break;
-            default:
-                qWarning() << Q_FUNC_INFO << "Unhandled spotify error:" << error;
-                break;
-        }
-    }
-
-    static void loggedOut(sp_session *session)
-    {
-        Q_UNUSED(session);
-        MainWindow::self()->spotifyLoggedOut();
-    }
-
-    static void metadataUpdated(sp_session *session)
-    {
-        Q_UNUSED(session);
-        MainWindow::self()->fillPlaylistModel();
-    }
-
-    static void connectionError(sp_session *session, sp_error error)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(error);
-
-    }
-
-    static void messageToUser(sp_session *session, const char *message)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(message);
-    }
-
-    static void notifyMainThread(sp_session *session)
-    {
-        Q_UNUSED(session);
-        MainWindow::self()->signalNotifyMainThread();
-    }
-
-    static int musicDelivery(sp_session *session, const sp_audioformat *format, const void *frames, int numFrames_)
-    {
-        Q_UNUSED(session);
-
-        if (!numFrames_) {
-            return 0;
-        }
-
-        const int numFrames = qMin(numFrames_, 8192);
-
-        QMutex &m = MainWindow::self()->dataMutex();
-        m.lock();
-        Chunk c;
-        c.m_data = malloc(numFrames * sizeof(int16_t) * format->channels);
-        memcpy(c.m_data, frames, numFrames * sizeof(int16_t) * format->channels);
-        c.m_dataFrames = numFrames;
-        c.m_rate = format->sample_rate;
-        MainWindow::self()->newChunk(c);
-        m.unlock();
-        MainWindow::self()->pcmWaitCondition().wakeAll();
-
-        return numFrames;
-    }
-
-    static void playTokenLost(sp_session *session)
-    {
-        Q_UNUSED(session);
-        MainWindow::self()->spotifyPlayTokenLost();
-    }
-
-    static void logMessage(sp_session *session, const char *data)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(data);
-    }
-
-    static void endOfTrack(sp_session *session)
-    {
-        Q_UNUSED(session);
-        MainWindow::self()->endOfTrack();
-    }
-
-    static void streamingError(sp_session *session, sp_error error)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(error);
-    }
-
-    static void userinfoUpdated(sp_session *session)
-    {
-        Q_UNUSED(session);
-    }
-
-#if SPOTIFY_API_VERSION > 4
-    static void startPlayback(sp_session *session)
-    {
-        Q_UNUSED(session);
-    }
-
-    static void stopPlayback(sp_session *session)
-    {
-        Q_UNUSED(session);
-    }
-
-    static void getAudioBufferStats(sp_session *session, sp_audio_buffer_stats *stats)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(stats);
-    }
-#endif
-
-#if SPOTIFY_API_VERSION >= 10
-    static void offlineStatusUpdated(sp_session *session)
-    {
-        Q_UNUSED(session);
-    }
-
-    static void offlineError(sp_session *session, sp_error error)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(error);
-    }
-#endif
-
-#if SPOTIFY_API_VERSION >= 11
-    static void credentialsBlobUpdated(sp_session *session, const char *blob)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(blob);
-    }
-#endif
-
-#if SPOTIFY_API_VERSION >= 12
-    static void connectionstateUpdated(sp_session *session)
-    {
-        Q_UNUSED(session);
-    }
-
-    static void scrobbleError(sp_session *session, sp_error error)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(error);
-    }
-
-    static void privateSessionModeChanged(sp_session *session, bool is_private)
-    {
-        Q_UNUSED(session);
-        Q_UNUSED(is_private);
-    }
-#endif
-
-    static sp_session_callbacks spotifyCallbacks = {
-        &SpotifySession::loggedIn,
-        &SpotifySession::loggedOut,
-        &SpotifySession::metadataUpdated,
-        &SpotifySession::connectionError,
-        &SpotifySession::messageToUser,
-        &SpotifySession::notifyMainThread,
-        &SpotifySession::musicDelivery,
-        &SpotifySession::playTokenLost,
-        &SpotifySession::logMessage,
-        &SpotifySession::endOfTrack,
-        &SpotifySession::streamingError,
-        &SpotifySession::userinfoUpdated
-#if SPOTIFY_API_VERSION > 4
-        , &SpotifySession::startPlayback,
-        &SpotifySession::stopPlayback,
-        &SpotifySession::getAudioBufferStats
-#endif
-#if SPOTIFY_API_VERSION >= 10
-        , &SpotifySession::offlineStatusUpdated,
-        &SpotifySession::offlineError
-#endif
-#if SPOTIFY_API_VERSION >= 11
-        , &SpotifySession::credentialsBlobUpdated
-#endif
-#if SPOTIFY_API_VERSION >= 12
-        , &SpotifySession::connectionstateUpdated,
-        &SpotifySession::scrobbleError,
-        &SpotifySession::privateSessionModeChanged
-#endif
-    };
-
-}
-//END: SpotifySession - application bridge
+using namespace libspokify;
 
 //BEGIN: SpotifyPlaylists - application bridge
 namespace SpotifyPlaylists {
@@ -542,9 +311,9 @@ namespace SpotifySearch {
 
         const int res = sp_search_total_tracks(result);
 #if SPOTIFY_API_VERSION >= 12
-        sp_search_create(libspokify::Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::searchComplete, userdata);
+        sp_search_create(Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::searchComplete, userdata);
 #else
-        sp_search_create(libspokify::Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, &SpotifySearch::searchComplete, userdata);
+        sp_search_create(Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, &SpotifySearch::searchComplete, userdata);
 #endif
     }
 
@@ -581,6 +350,7 @@ MainWindow::MainWindow(QWidget *parent)
     : KXmlGuiWindow(parent)
     , m_soundFeeder(new SoundFeeder(this))
     , m_isExiting(false)
+    , m_session(0)
     , m_pc(0)
     , m_currentPlaylist(0)
     , m_statusLabel(new QLabel(i18n("Ready"), this))
@@ -616,7 +386,6 @@ MainWindow::MainWindow(QWidget *parent)
         contextMenu->addAction(m_nextTrack);
     }
 
-    connect(this, SIGNAL(notifyMainThreadSignal()), this, SLOT(notifyMainThread()), Qt::QueuedConnection);
     connect(this, SIGNAL(newChunkReceived(Chunk)), this, SLOT(newChunkReceivedSlot(Chunk)), Qt::QueuedConnection);
     connect(this, SIGNAL(coverLoaded(QImage)), this, SLOT(coverLoadedSlot(QImage)), Qt::QueuedConnection);
     connect(m_soundFeeder, SIGNAL(pcmWritten(Chunk)), this, SLOT(pcmWrittenSlot(Chunk)));
@@ -632,15 +401,23 @@ MainWindow::MainWindow(QWidget *parent)
     {
         const QString settingsPath = QString("%1/.config/spotify").arg(QDir::homePath());
 
-        libspokify::Session::Config config(QByteArray((const char *)g_appkey, (int)g_appkey_size), "spokify", &SpotifySession::spotifyCallbacks);
+        Session::Config config(QByteArray((const char *)g_appkey, (int)g_appkey_size), "spokify");
         config.setCacheLocation(settingsPath);
         config.setSettingsLocation(settingsPath);
 
-        libspokify::Session session(config);
-        if (!session.isInitialized()) {
-            KMessageBox::error(this, i18n("Couldn't create Spotify session.\n\nThe error message is \"%1\".\n\nPlease try again. If the problem persists contact the developers.", session.initializationError().description()), i18n("A critical error happened"));
+        m_session = new Session(config, this);
+        if (!m_session->isInitialized()) {
+            KMessageBox::error(this, i18n("Couldn't create Spotify session.\n\nThe error message is \"%1\".\n\nPlease try again. If the problem persists contact the developers.", m_session->initializationError().description()), i18n("A critical error happened"));
             return;
         }
+
+        m_session->registerAudioConsumer(this);
+
+        connect(m_session, SIGNAL(loggedIn(libspokify::Error)), this, SLOT(spotifyLoggedIn(libspokify::Error)));
+        connect(m_session, SIGNAL(loggedOut()), this, SLOT(spotifyLoggedOut()));
+        connect(m_session, SIGNAL(metadataUpdated()), this, SLOT(fillPlaylistModel()));
+        connect(m_session, SIGNAL(playTokenLost()), this, SLOT(spotifyPlayTokenLost()));
+        connect(m_session, SIGNAL(endOfTrack()), this, SLOT(endOfTrack()));
     }
     //END: Spotify session init
 
@@ -730,14 +507,12 @@ MainWindow::~MainWindow()
     m_isExiting = true;
     m_pcmWaitCondition.wakeAll();
 
-    libspokify::Session session;
-
     if (m_loggedIn) {
-        session.logout();
+        m_session->logout();
     }
 
 #if SPOTIFY_API_VERSION > 4
-    session.destroy();
+    m_session->destroy();
 #endif
 }
 
@@ -753,7 +528,7 @@ bool MainWindow::isExiting() const
 
 sp_playlistcontainer *MainWindow::playlistContainer() const
 {
-    return sp_session_playlistcontainer(libspokify::Session().session());
+    return sp_session_playlistcontainer(m_session->session());
 }
 
 MainWindow *MainWindow::self()
@@ -781,31 +556,57 @@ QListView *MainWindow::searchHistoryView() const
     return m_searchHistoryView;
 }
 
-void MainWindow::signalNotifyMainThread()
-{
-    emit notifyMainThreadSignal();
-}
-
 bool MainWindow::isPlaying() const
 {
     return m_mainWidget->state() == MainWidget::Playing;
 }
 
-void MainWindow::spotifyLoggedIn()
+void MainWindow::spotifyLoggedIn(const Error &error)
 {
-    showTemporaryMessage(i18n("Logged in"));
+    if (error.type() == Error::ERROR_OK) {
+        showTemporaryMessage(i18n("Logged in"));
 
-    m_loggedIn = true;
-    m_login->setVisible(false);
-    m_login->setEnabled(true);
-    m_logout->setVisible(true);
-    m_playlistView->setEnabled(true);
-    m_searchHistoryView->setEnabled(true);
-    m_searchCategory->setEnabled(true);
-    m_searchField->setEnabled(true);
-    m_cover->setEnabled(true);
-    m_mainWidget->loggedIn();
-    fillPlaylistModel();
+        m_loggedIn = true;
+        m_login->setVisible(false);
+        m_login->setEnabled(true);
+        m_logout->setVisible(true);
+        m_playlistView->setEnabled(true);
+        m_searchHistoryView->setEnabled(true);
+        m_searchCategory->setEnabled(true);
+        m_searchField->setEnabled(true);
+        m_cover->setEnabled(true);
+        m_mainWidget->loggedIn();
+        fillPlaylistModel();
+
+        return;
+    }
+
+    restoreStatusBarSlot();
+    actionCollection()->action("login")->setEnabled(true);
+
+    switch (error.type()) {
+    case Error::ERROR_INTERNAL:
+        KMessageBox::sorry(this, i18n("An internal error happened with description (%1).\n\nPlease, report this bug.", error.description()), i18n("A critical error happened"));
+        break;
+    case Error::ERROR_BAD_USERNAME_OR_PASSWORD:
+        KMessageBox::sorry(this, i18n("Invalid username or password"), i18n("Invalid username or password"));
+        break;
+    case Error::ERROR_USER_BANNED:
+        KMessageBox::sorry(this, i18n("This user has been banned"), i18n("User banned"));
+        break;
+    case Error::ERROR_UNABLE_TO_CONTACT_SERVER:
+        KMessageBox::sorry(this, i18n("Cannot connect to server"), i18n("Cannot connect to server"));
+        break;
+    case Error::ERROR_OTHER_PERMANENT:
+        KMessageBox::sorry(this, i18n("Something wrong happened.\n\nWhatever it is, it is permanent."), i18n("Something wrong happened"));
+        break;
+    case Error::ERROR_USER_NEEDS_PREMIUM:
+        KMessageBox::sorry(this, i18n("You need to be a Premium User in order to login"), i18n("Premium User access required"));
+        break;
+    default:
+        qWarning() << Q_FUNC_INFO << "Unhandled spotify error:" << error.description();
+        break;
+    }
 }
 
 void MainWindow::spotifyLoggedOut()
@@ -864,6 +665,27 @@ QWaitCondition &MainWindow::playCondition()
     return m_playCondition;
 }
 
+unsigned int MainWindow::consumeAudio(const AudioChunk &chunk) {
+    if (chunk.NumFrames == 0) {
+        return 0;
+    }
+
+    const unsigned int numFrames = qMin(chunk.NumFrames, (unsigned int)8192);
+
+    QMutex &m = dataMutex();
+    m.lock();
+    Chunk c;
+    c.m_data = malloc(numFrames * sizeof(int16_t) * chunk.NumChannels);
+    memcpy(c.m_data, chunk.Frames, numFrames * sizeof(int16_t) * chunk.NumChannels);
+    c.m_dataFrames = numFrames;
+    c.m_rate = chunk.SampleRate;
+    newChunk(c);
+    m.unlock();
+    pcmWaitCondition().wakeAll();
+
+    return numFrames;
+}
+
 void MainWindow::newChunk(const Chunk &chunk)
 {
     m_data.enqueue(chunk);
@@ -903,7 +725,7 @@ void MainWindow::endOfTrack()
 void MainWindow::fillPlaylistModel()
 {
     if (!m_pc) {
-        m_pc = sp_session_playlistcontainer(libspokify::Session().session());
+        m_pc = sp_session_playlistcontainer(m_session->session());
         sp_playlistcontainer_add_callbacks(m_pc, &SpotifyPlaylistContainer::spotifyCallbacks, this);
     }
 
@@ -926,7 +748,7 @@ void MainWindow::fillPlaylistModel()
 
     // Add the special playlist for starred tracks
     {
-        sp_playlist *pl = sp_session_starred_create(libspokify::Session().session());
+        sp_playlist *pl = sp_session_starred_create(m_session->session());
         Q_ASSERT(pl);
         if (pl == m_currentPlaylist) {
             currRow = 0;
@@ -987,15 +809,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->ignore();
 }
 
-void MainWindow::notifyMainThread()
-{
-    int timeout;
-    do {
-        sp_session_process_events(libspokify::Session().session(), &timeout);
-    } while (!timeout);
-    QTimer::singleShot(timeout, this, SLOT(notifyMainThread()));
-}
-
 void MainWindow::signalCoverLoaded(const QImage &cover)
 {
     emit coverLoaded(cover);
@@ -1024,7 +837,7 @@ void MainWindow::logoutSlot()
     m_logout->setEnabled(false);
 
     //BEGIN: Spotify logout
-    libspokify::Session().logout();
+    m_session->logout();
     //END: Spotify logout
 
     QTimer::singleShot(0, this, SLOT(clearAllWidgets()));
@@ -1093,9 +906,9 @@ void MainWindow::performSearch()
     }
 
 #if SPOTIFY_API_VERSION >= 12
-    sp_search_create(libspokify::Session().session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::dummySearchComplete, new QString(query));
+    sp_search_create(m_session->session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::dummySearchComplete, new QString(query));
 #else
-    sp_search_create(libspokify::Session().session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, &SpotifySearch::dummySearchComplete, new QString(query));
+    sp_search_create(m_session->session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, &SpotifySearch::dummySearchComplete, new QString(query));
 #endif
 }
 
@@ -1172,9 +985,9 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
             const QModelIndex &index = trackModel->index(i, TrackModel::SpotifyNativeTrackRole);
 
 #if SPOTIFY_API_VERSION < 10
-            if (!sp_track_is_available(libspokify::Session().session(), trackModel->data(index).value<sp_track*>())) {
+            if (!sp_track_is_available(m_session->session(), trackModel->data(index).value<sp_track*>())) {
 #else
-            if (sp_track_get_availability(libspokify::Session().session(), trackModel->data(index).value<sp_track*>()) != SP_TRACK_AVAILABILITY_AVAILABLE) {
+            if (sp_track_get_availability(m_session->session(), trackModel->data(index).value<sp_track*>()) != SP_TRACK_AVAILABILITY_AVAILABLE) {
 #endif
                 trackModel->removeRow(i);
             }
@@ -1211,7 +1024,7 @@ void MainWindow::seekPosition(int position)
     }
     snd_pcm_prepare(m_snd);
     m_pcmMutex.unlock();
-    sp_session_player_seek(libspokify::Session().session(), position);
+    sp_session_player_seek(m_session->session(), position);
 }
 
 void MainWindow::currentTrackFinishedSlot()
@@ -1391,10 +1204,10 @@ void MainWindow::play(sp_track *tr)
 #else
     const byte *image = sp_album_cover(album);
 #endif
-    sp_image *const cover = sp_image_create(libspokify::Session().session(), image);
+    sp_image *const cover = sp_image_create(m_session->session(), image);
     sp_image_add_load_callback(cover, &SpotifyImage::imageLoaded, tr);
-    sp_session_player_load(libspokify::Session().session(), tr);
-    sp_session_player_play(libspokify::Session().session(), true);
+    sp_session_player_load(m_session->session(), tr);
+    sp_session_player_play(m_session->session(), true);
     m_mainWidget->setTotalTrackTime(sp_track_duration(tr));
 
     // Set the currently playing song
@@ -1440,8 +1253,8 @@ void MainWindow::clearSoundQueue()
 {
     m_dataMutex.lock();
     if (isPlaying()) {
-        sp_session_player_play(libspokify::Session().session(), false);
-        sp_session_player_unload(libspokify::Session().session());
+        sp_session_player_play(m_session->session(), false);
+        sp_session_player_unload(m_session->session());
         m_pcmMutex.lock();
         snd_pcm_drop(m_snd);
         m_pcmMutex.unlock();

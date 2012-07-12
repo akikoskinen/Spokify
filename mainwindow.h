@@ -22,6 +22,7 @@
 #include <KXmlGuiWindow>
 
 #include "chunk.h"
+#include "libspokify/Session.h"
 
 #include <QtCore/QMutex>
 #include <QtCore/QQueue>
@@ -58,7 +59,7 @@ class Scrobbler;
 class LyricsWidget;
 
 class MainWindow
-    : public KXmlGuiWindow
+    : public KXmlGuiWindow, public libspokify::AudioConsumer
 {
     Q_OBJECT
 
@@ -82,18 +83,10 @@ public:
 
     QListView *searchHistoryView() const;
 
-    void signalNotifyMainThread();
-
     void signalCoverLoaded(const QImage &cover);
 
     void setIsPlaying(bool isPlaying);
     bool isPlaying() const;
-
-    void spotifyLoggedIn();
-
-    void spotifyLoggedOut();
-
-    void spotifyPlayTokenLost();
 
     void showTemporaryMessage(const QString &message);
 
@@ -109,15 +102,13 @@ public:
 
     QWaitCondition &playCondition();
 
+    virtual unsigned int consumeAudio(const libspokify::AudioChunk &chunk);
+
     void newChunk(const Chunk &chunk);
 
     Chunk nextChunk();
 
     bool hasChunk() const;
-
-    void endOfTrack();
-
-    void fillPlaylistModel();
 
     bool shuffle();
     bool repeat();
@@ -125,8 +116,9 @@ public:
 public Q_SLOTS:
     void restoreStatusBarSlot();
 
+    void fillPlaylistModel();
+
 Q_SIGNALS:
-    void notifyMainThreadSignal();
     void newChunkReceived(const Chunk &chunk);
     void coverLoaded(const QImage &cover);
     void nowPlaying(const QString &artist, const QString &title, const uint duration);
@@ -136,8 +128,11 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
 
 private Q_SLOTS:
-    void notifyMainThread();
+    void spotifyLoggedIn(const libspokify::Error &error);
+    void spotifyLoggedOut();
     void newChunkReceivedSlot(const Chunk &chunk);
+    void spotifyPlayTokenLost();
+    void endOfTrack();
     void coverLoadedSlot(const QImage &cover);
     void loginSlot();
     void logoutSlot();
@@ -177,6 +172,8 @@ private:
     QQueue<Chunk>         m_data;
     SoundFeeder          *m_soundFeeder;
     bool                  m_isExiting;
+
+    libspokify::Session  *m_session;
 
     sp_playlistcontainer *m_pc;
 

@@ -39,7 +39,8 @@ set(LIBSPOKIFY_DIR libspokify)
 
 list(APPEND spokify_SRCS
     ${LIBSPOKIFY_DIR}/Error.cpp
-    ${LIBSPOKIFY_DIR}/Session.cpp)
+    ${LIBSPOKIFY_DIR}/Session.cpp
+    ${LIBSPOKIFY_DIR}/sessionMaster.cpp)
  
 kde4_add_executable(spokify ${spokify_SRCS})
  
