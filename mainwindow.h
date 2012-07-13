@@ -22,7 +22,9 @@
 #include <KXmlGuiWindow>
 
 #include "chunk.h"
+
 #include "libspokify/Session.h"
+#include "libspokify/Player.h"
 
 #include <QtCore/QMutex>
 #include <QtCore/QQueue>

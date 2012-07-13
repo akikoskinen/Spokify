@@ -10,25 +10,6 @@ struct sp_session;
 
 namespace libspokify {
 
-// TODO move this to the player
-class AudioChunk {
-public:
-    AudioChunk(unsigned int sampleRate, unsigned char numChannels, const void *frames, unsigned int numFrames);
-
-    const unsigned int SampleRate;
-    const unsigned char NumChannels;
-
-    const void *Frames;
-    const unsigned int NumFrames;
-};
-
-// TODO move this to the player
-class AudioConsumer {
-public:
-    virtual ~AudioConsumer() {}
-    virtual unsigned int consumeAudio(const AudioChunk &chunk) = 0;
-};
-
 class Player;
 
 class Session : public QObject {
@@ -75,9 +56,6 @@ public:
     Error destroy();
 
     Player& player();
-
-    // TODO move this to the player
-    void registerAudioConsumer(AudioConsumer *consumer);
 
     sp_session* session() const;
 

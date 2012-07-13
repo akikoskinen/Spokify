@@ -4,13 +4,29 @@
 #include <QObject>
 #include <QMap>
 
-#include "Player.h"
+#include <libspotify/api.h>
 
-struct sp_session;
+#include "Player.h"
+#include "Error.h"
 
 namespace libspokify {
 
-class Error;
+class SessionError : public Error {
+public:
+    SessionError();
+
+    virtual ~SessionError();
+
+    void setError(sp_error error);
+
+    virtual Type type() const;
+
+    virtual QString description() const;
+
+private:
+    sp_error m_error;
+};
+
 
 class SpokifyPlayer : public Player {
     Q_OBJECT
@@ -77,6 +93,8 @@ private:
     SpokifyPlayer *m_player;
 
 };
+
+void fillSessionCallbacks(sp_session_callbacks &callbacks);
 
 }
 

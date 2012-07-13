@@ -7,6 +7,25 @@ struct sp_track;
 
 namespace libspokify {
 
+class AudioChunk {
+public:
+    AudioChunk(unsigned int sampleRate, unsigned char numChannels, const void *frames, unsigned int numFrames);
+
+    const unsigned int SampleRate;
+    const unsigned char NumChannels;
+
+    const void *Frames;
+    const unsigned int NumFrames;
+};
+
+
+class AudioConsumer {
+public:
+    virtual ~AudioConsumer() {}
+    virtual unsigned int consumeAudio(const AudioChunk &chunk) = 0;
+};
+
+
 class Player : public QObject {
     Q_OBJECT
 
@@ -14,6 +33,9 @@ public:
     explicit Player(QObject *parent = 0);
 
     virtual ~Player();
+
+    void registerAudioConsumer(AudioConsumer *consumer);
+    unsigned int consumeAudio(const AudioChunk &chunk);
 
     /**
      * Seeks to a position in the current track.
@@ -26,6 +48,9 @@ public:
 
     virtual void play() = 0;
     virtual void pause() = 0;
+
+private:
+    AudioConsumer* m_audioConsumer;
 
 };
 

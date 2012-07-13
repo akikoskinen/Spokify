@@ -412,7 +412,7 @@ MainWindow::MainWindow(QWidget *parent)
             return;
         }
 
-        m_session->registerAudioConsumer(this);
+        m_session->player().registerAudioConsumer(this);
 
         connect(m_session, SIGNAL(loggedIn(libspokify::Error)), this, SLOT(spotifyLoggedIn(libspokify::Error)));
         connect(m_session, SIGNAL(loggedOut()), this, SLOT(spotifyLoggedOut()));
