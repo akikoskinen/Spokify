@@ -84,19 +84,19 @@ static void cbLoggedIn(sp_session *session, sp_error err) {
     SessionError error;
     error.setError(err);
 
-    SessionMaster::get(session)->notifyLoggedIn(error);
+    SessionMaster::get(session).notifyLoggedIn(error);
 }
 
 static void cbLoggedOut(sp_session *session) {
-    SessionMaster::get(session)->notifyLoggedOut();
+    SessionMaster::get(session).notifyLoggedOut();
 }
 
 static void cbMetadataUpdated(sp_session *session) {
-    SessionMaster::get(session)->notifyMetadataUpdated();
+    SessionMaster::get(session).notifyMetadataUpdated();
 }
 
 static void cbNotifyMainThread(sp_session *session) {
-    SessionMaster::get(session)->processSessionEvents();
+    SessionMaster::get(session).processSessionEvents();
 }
 
 static int cbMusicDelivery(sp_session *session, const sp_audioformat *format, const void *frames, int numFrames_) {
@@ -109,11 +109,11 @@ static int cbMusicDelivery(sp_session *session, const sp_audioformat *format, co
 }
 
 static void cbPlayTokenLost(sp_session *session) {
-    SessionMaster::get(session)->notifyPlayTokenLost();
+    SessionMaster::get(session).notifyPlayTokenLost();
 }
 
 static void cbEndOfTrack(sp_session *session) {
-    SessionMaster::get(session)->notifyEndOfTrack();
+    SessionMaster::get(session).notifyEndOfTrack();
 }
 //END: SpotifySession - application bridge
 
@@ -247,6 +247,10 @@ Error Session::destroy() {
     return Error();
 }
 
+Player& Session::player() {
+    return SessionMaster::get(session()).player();
+}
+
 void Session::registerAudioConsumer(AudioConsumer *consumer) {
     AudioConsumers[session()] = consumer;
 }
@@ -260,7 +264,7 @@ void Session::connectToSessionMasterSignals() {
         return;
     }
 
-    SessionMaster* sessionMaster = SessionMaster::get(m_session);
+    SessionMaster* sessionMaster = &SessionMaster::get(m_session);
 
     connect(sessionMaster, SIGNAL(loggedIn(libspokify::Error)), SIGNAL(loggedIn(libspokify::Error)));
     connect(sessionMaster, SIGNAL(loggedOut()), SIGNAL(loggedOut()));

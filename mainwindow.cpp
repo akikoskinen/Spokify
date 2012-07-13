@@ -32,6 +32,7 @@
 
 #include "libspokify/Session.h"
 #include "libspokify/Error.h"
+#include "libspokify/Player.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QTimer>
@@ -1024,7 +1025,8 @@ void MainWindow::seekPosition(int position)
     }
     snd_pcm_prepare(m_snd);
     m_pcmMutex.unlock();
-    sp_session_player_seek(m_session->session(), position);
+
+    m_session->player().seek(position);
 }
 
 void MainWindow::currentTrackFinishedSlot()
@@ -1206,8 +1208,8 @@ void MainWindow::play(sp_track *tr)
 #endif
     sp_image *const cover = sp_image_create(m_session->session(), image);
     sp_image_add_load_callback(cover, &SpotifyImage::imageLoaded, tr);
-    sp_session_player_load(m_session->session(), tr);
-    sp_session_player_play(m_session->session(), true);
+    m_session->player().load(tr);
+    m_session->player().play();
     m_mainWidget->setTotalTrackTime(sp_track_duration(tr));
 
     // Set the currently playing song
@@ -1253,8 +1255,8 @@ void MainWindow::clearSoundQueue()
 {
     m_dataMutex.lock();
     if (isPlaying()) {
-        sp_session_player_play(m_session->session(), false);
-        sp_session_player_unload(m_session->session());
+        m_session->player().pause();
+        m_session->player().unload();
         m_pcmMutex.lock();
         snd_pcm_drop(m_snd);
         m_pcmMutex.unlock();

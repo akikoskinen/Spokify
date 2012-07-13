@@ -4,11 +4,35 @@
 #include <QObject>
 #include <QMap>
 
+#include "Player.h"
+
 struct sp_session;
 
 namespace libspokify {
 
 class Error;
+
+class SpokifyPlayer : public Player {
+    Q_OBJECT
+
+public:
+    explicit SpokifyPlayer(sp_session* session, QObject *parent = 0);
+
+    virtual ~SpokifyPlayer();
+
+    virtual void seek(unsigned int position);
+
+    virtual void load(sp_track *track);
+    virtual void unload();
+
+    virtual void play();
+    virtual void pause();
+
+private:
+    sp_session *m_session;
+
+};
+
 
 /**
  * A class that handles a single libspotify session. libspotify currently only
@@ -21,8 +45,10 @@ class SessionMaster : public QObject {
 public:
     virtual ~SessionMaster();
 
-    static SessionMaster* get(sp_session* session);
+    static SessionMaster& get(sp_session* session);
     static void destroy(sp_session* session);
+
+    Player& player();
 
     void notifyLoggedIn(const Error &error);
     void notifyLoggedOut();
@@ -47,6 +73,8 @@ private:
     sp_session *m_session;
 
     static QMap<sp_session*, SessionMaster*> SessionMasters;
+
+    SpokifyPlayer *m_player;
 
 };
 

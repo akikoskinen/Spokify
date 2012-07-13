@@ -29,6 +29,7 @@ public:
     virtual unsigned int consumeAudio(const AudioChunk &chunk) = 0;
 };
 
+class Player;
 
 class Session : public QObject {
     Q_OBJECT
@@ -72,6 +73,8 @@ public:
 
     // Currently returns no error
     Error destroy();
+
+    Player& player();
 
     // TODO move this to the player
     void registerAudioConsumer(AudioConsumer *consumer);
