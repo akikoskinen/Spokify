@@ -57,6 +57,7 @@ public:
 
     Player& player();
 
+    // TODO remove this eventually
     sp_session* session() const;
 
 Q_SIGNALS:

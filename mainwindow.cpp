@@ -33,6 +33,7 @@
 #include "libspokify/Session.h"
 #include "libspokify/Error.h"
 #include "libspokify/Player.h"
+#include "libspokify/PlaylistContainer.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QTimer>
@@ -529,7 +530,7 @@ bool MainWindow::isExiting() const
 
 sp_playlistcontainer *MainWindow::playlistContainer() const
 {
-    return sp_session_playlistcontainer(m_session->session());
+    return PlaylistContainer(*m_session).native();
 }
 
 MainWindow *MainWindow::self()

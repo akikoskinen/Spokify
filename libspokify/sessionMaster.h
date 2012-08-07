@@ -52,7 +52,7 @@ private:
 
 /**
  * A class that handles a single libspotify session. libspotify currently only
- * supports one session but with class it is possible to support multiple
+ * supports one session but with this class it is possible to support multiple
  * sessions if libspotify ever starts to do that.
  */
 class SessionMaster : public QObject {
