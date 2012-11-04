@@ -11,10 +11,6 @@ PlaylistContainer::PlaylistContainer(QObject *parent) :
 PlaylistContainer::~PlaylistContainer() {
 }
 
-void PlaylistContainer::setNative(sp_playlistcontainer *native) {
-    m_nativeContainer = native;
-}
-
 sp_playlistcontainer* PlaylistContainer::native() const {
     return m_nativeContainer;
 }

@@ -4,6 +4,7 @@
 #include <QObject>
 
 struct sp_playlistcontainer;
+struct sp_playlist;
 
 namespace libspokify {
 
@@ -15,13 +16,16 @@ public:
 
     virtual ~PlaylistContainer();
 
-    // TODO remove this from the public interface when the internal type is not needed anymore
-    void setNative(sp_playlistcontainer *native);
-
     // TODO remove this when the internal type is not needed anymore
     sp_playlistcontainer* native() const;
 
-private:
+Q_SIGNALS:
+    void playlistAdded(sp_playlist *playlist, int position);
+    void playlistRemoved(sp_playlist *playlist, int position);
+    void playlistMoved(sp_playlist *playlist, int fromPosition, int toPosition);
+    void containerLoaded();
+
+protected:
     sp_playlistcontainer *m_nativeContainer;
 };
 

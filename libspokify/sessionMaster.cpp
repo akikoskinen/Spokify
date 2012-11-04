@@ -122,7 +122,10 @@ void SessionMaster::destroy(sp_session* session) {
 
 PlaylistContainer& SessionMaster::playlistContainer() {
     if (m_playlistContainer.native() == 0) {
-        m_playlistContainer.setNative(sp_session_playlistcontainer(m_session));
+        sp_playlistcontainer *plc = sp_session_playlistcontainer(m_session);
+        if (plc != 0) {
+            m_playlistContainer.setNative(plc);
+        }
     }
 
     return m_playlistContainer;

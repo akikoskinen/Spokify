@@ -199,54 +199,6 @@ namespace SpotifyPlaylists {
 }
 //END: SpotifyPlaylists - application bridge
 
-//BEGIN: SpotifyPlaylistContainer - application bridge
-namespace SpotifyPlaylistContainer {
-
-    static void playlistAdded(sp_playlistcontainer *pc, sp_playlist *playlist, int position, void *userdata)
-    {
-        Q_UNUSED(pc);
-        Q_UNUSED(playlist);
-        Q_UNUSED(position);
-        Q_UNUSED(userdata);
-        MainWindow::self()->fillPlaylistModel();
-    }
-
-    static void playlistRemoved(sp_playlistcontainer *pc, sp_playlist *playlist, int position, void *userdata)
-    {
-        Q_UNUSED(pc);
-        Q_UNUSED(playlist);
-        Q_UNUSED(position);
-        Q_UNUSED(userdata);
-        MainWindow::self()->fillPlaylistModel();
-    }
-
-    static void playlistMoved(sp_playlistcontainer *pc, sp_playlist *playlist, int position, int newPosition, void *userdata)
-    {
-        Q_UNUSED(pc);
-        Q_UNUSED(playlist);
-        Q_UNUSED(position);
-        Q_UNUSED(newPosition);
-        Q_UNUSED(userdata);
-        MainWindow::self()->fillPlaylistModel();
-    }
-
-    static void containerLoaded(sp_playlistcontainer *pc, void *userdata)
-    {
-        Q_UNUSED(pc);
-        Q_UNUSED(userdata);
-        MainWindow::self()->fillPlaylistModel();
-    }
-
-    static sp_playlistcontainer_callbacks spotifyCallbacks = {
-        &SpotifyPlaylistContainer::playlistAdded,
-        &SpotifyPlaylistContainer::playlistRemoved,
-        &SpotifyPlaylistContainer::playlistMoved,
-        &SpotifyPlaylistContainer::containerLoaded
-    };
-
-}
-//END: SpotifyPlaylistContainer - application bridge
-
 //BEGIN: SpotifySearch - application bridge
 namespace SpotifySearch {
 
@@ -419,6 +371,12 @@ MainWindow::MainWindow(QWidget *parent)
         connect(m_session, SIGNAL(metadataUpdated()), this, SLOT(fillPlaylistModel()));
         connect(m_session, SIGNAL(playTokenLost()), this, SLOT(spotifyPlayTokenLost()));
         connect(m_session, SIGNAL(endOfTrack()), this, SLOT(endOfTrack()));
+
+        PlaylistContainer &sessionPlaylistContainer = m_session->playlistContainer();
+        connect(&sessionPlaylistContainer, SIGNAL(containerLoaded()), this, SLOT(fillPlaylistModel()));
+        connect(&sessionPlaylistContainer, SIGNAL(playlistAdded(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
+        connect(&sessionPlaylistContainer, SIGNAL(playlistMoved(sp_playlist*,int,int)), this, SLOT(fillPlaylistModel()));
+        connect(&sessionPlaylistContainer, SIGNAL(playlistRemoved(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
     }
     //END: Spotify session init
 
@@ -725,7 +683,6 @@ void MainWindow::fillPlaylistModel()
 
     if (!m_pc) {
         m_pc = m_session->playlistContainer().native();
-        sp_playlistcontainer_add_callbacks(m_pc, &SpotifyPlaylistContainer::spotifyCallbacks, this);
     }
 
     int numPlaylists = sp_playlistcontainer_num_playlists(m_pc);

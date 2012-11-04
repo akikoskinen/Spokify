@@ -6,7 +6,7 @@
 
 #include <libspotify/api.h>
 
-#include "PlaylistContainer.h"
+#include "spokifyPlaylistContainer.h"
 #include "Player.h"
 #include "Error.h"
 
@@ -92,7 +92,7 @@ private:
 
     static QMap<sp_session*, SessionMaster*> SessionMasters;
 
-    PlaylistContainer m_playlistContainer;
+    SpokifyPlaylistContainer m_playlistContainer;
     SpokifyPlayer m_player;
 
 };

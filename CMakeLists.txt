@@ -42,12 +42,13 @@ list(APPEND spokify_SRCS
     ${LIBSPOKIFY_DIR}/Session.cpp
     ${LIBSPOKIFY_DIR}/sessionMaster.cpp
     ${LIBSPOKIFY_DIR}/Player.cpp
-    ${LIBSPOKIFY_DIR}/PlaylistContainer.cpp)
- 
+    ${LIBSPOKIFY_DIR}/PlaylistContainer.cpp
+    ${LIBSPOKIFY_DIR}/spokifyPlaylistContainer.cpp)
+
 kde4_add_executable(spokify ${spokify_SRCS})
- 
+
 target_link_libraries(spokify ${KDE4_KDEUI_LIBS} ${QT_LIBRARIES} ${LIBSPOTIFY_LIBRARIES} ${LIBLASTFM_LIBRARY} asound)
- 
+
 install(TARGETS spokify DESTINATION ${BIN_INSTALL_DIR})
 install(FILES spokifyui.rc
               spokify.notifyrc DESTINATION ${DATA_INSTALL_DIR}/spokify)
