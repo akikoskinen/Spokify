@@ -48,13 +48,12 @@ int main(int argc, char **argv)
 
     KGlobal::activeComponent().setAboutData(aboutData);
 
-    MainWindow *window = new MainWindow();
+    MainWindow window;
     if (!libspokify::Session().isInitialized()) {
-        delete window;
         return EXIT_FAILURE;
     }
 
-    window->show();
+    window.show();
 
     return app.exec();
 }
