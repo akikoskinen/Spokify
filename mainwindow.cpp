@@ -353,7 +353,6 @@ MainWindow::MainWindow(QWidget *parent)
     , m_soundFeeder(new SoundFeeder(this))
     , m_isExiting(false)
     , m_session(0)
-    , m_pc(0)
     , m_currentPlaylist(0)
     , m_statusLabel(new QLabel(i18n("Ready"), this))
     , m_progress(new QProgressBar(this))
@@ -362,7 +361,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_mainWidget(new MainWidget(this))
     , m_playlistModel(new PlaylistModel(this))
     , m_searchHistoryModel(new SearchHistoryModel(this))
-    , m_playlistView(new PlaylistView(this))
+    , m_playlistView(0)
     , m_searchHistoryView(new QListView(this))
 {
     qRegisterMetaType<Chunk>();
@@ -425,6 +424,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //BEGIN: set up playlists widget
     {
+        m_playlistView = new PlaylistView(m_session->playlistContainer(), this);
         m_playlistView->setAlternatingRowColors(true);
         m_playlistView->setEditTriggers(QAbstractItemView::NoEditTriggers);
         m_playlistView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -526,11 +526,6 @@ QSize MainWindow::sizeHint() const
 bool MainWindow::isExiting() const
 {
     return m_isExiting;
-}
-
-sp_playlistcontainer *MainWindow::playlistContainer() const
-{
-    return PlaylistContainer(*m_session).native();
 }
 
 MainWindow *MainWindow::self()
@@ -726,8 +721,10 @@ void MainWindow::endOfTrack()
 
 void MainWindow::fillPlaylistModel()
 {
+    static sp_playlistcontainer *m_pc = 0;
+
     if (!m_pc) {
-        m_pc = sp_session_playlistcontainer(m_session->session());
+        m_pc = m_session->playlistContainer().native();
         sp_playlistcontainer_add_callbacks(m_pc, &SpotifyPlaylistContainer::spotifyCallbacks, this);
     }
 

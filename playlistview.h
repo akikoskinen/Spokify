@@ -21,6 +21,10 @@
 
 #include <QtGui/QListView>
 
+namespace libspokify {
+class PlaylistContainer;
+}
+
 class KMenu;
 
 class PlaylistView
@@ -29,7 +33,7 @@ class PlaylistView
     Q_OBJECT
 
 public:
-    PlaylistView(QWidget *parent = 0);
+    PlaylistView(libspokify::PlaylistContainer &playlistContainer, QWidget *parent = 0);
     virtual ~PlaylistView();
 
 protected:
@@ -44,6 +48,7 @@ private Q_SLOTS:
     void deletePlaylistSlot();
 
 private:
+    libspokify::PlaylistContainer &m_playlistContainer;
     KMenu *m_contextMenu;
     KMenu *m_contextMenuEmpty;
 };

@@ -18,9 +18,9 @@
 
 #include "playlistview.h"
 #include "mimedata.h"
-#include "mainwindow.h"
 #include "playlistmodel.h"
 #include "libspokify/Session.h"
+#include "libspokify/PlaylistContainer.h"
 
 #include <libspotify/api.h>
 
@@ -36,8 +36,9 @@
 #include <KLineEdit>
 #include <KMessageBox>
 
-PlaylistView::PlaylistView(QWidget *parent)
+PlaylistView::PlaylistView(libspokify::PlaylistContainer &playlistContainer, QWidget *parent)
     : QListView(parent)
+    , m_playlistContainer(playlistContainer)
     , m_contextMenu(new KMenu(this))
     , m_contextMenuEmpty(new KMenu(this))
 {
@@ -112,8 +113,7 @@ void PlaylistView::newPlaylistSlot()
     playlistName->setFocus();
 
     if (dialog->exec() == KDialog::Accepted && !playlistName->text().isEmpty()) {
-        sp_playlistcontainer *const playlistContainer = MainWindow::self()->playlistContainer();
-        sp_playlistcontainer_add_new_playlist(playlistContainer, playlistName->text().toUtf8().data());
+        sp_playlistcontainer_add_new_playlist(m_playlistContainer.native(), playlistName->text().toUtf8().data());
     }
 }
 
@@ -147,7 +147,6 @@ void PlaylistView::deletePlaylistSlot()
     sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
     if (KMessageBox::questionYesNo(this, i18n("Are you sure that you want to delete the playlist \"%1\"?", QString::fromUtf8(sp_playlist_name(targetPlaylist))),
                                          i18n("Delete Playlist")) == KMessageBox::Yes) {
-        sp_playlistcontainer *const playlistContainer = MainWindow::self()->playlistContainer();
-        sp_playlistcontainer_remove_playlist(playlistContainer, currentIndex().row());
+        sp_playlistcontainer_remove_playlist(m_playlistContainer.native(), currentIndex().row());
     }
 }

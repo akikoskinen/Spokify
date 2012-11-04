@@ -5,7 +5,6 @@
 
 namespace libspokify {
 
-
 SessionError::SessionError() :
     m_error(SP_ERROR_OK)
 {
@@ -101,6 +100,7 @@ QMap<sp_session*, SessionMaster*> SessionMaster::SessionMasters;
 
 SessionMaster::SessionMaster(sp_session *session) :
     m_session(session),
+    m_playlistContainer(this),
     m_player(session, this)
 {
 }
@@ -118,6 +118,14 @@ SessionMaster& SessionMaster::get(sp_session* session) {
 
 void SessionMaster::destroy(sp_session* session) {
     delete SessionMasters.take(session);
+}
+
+PlaylistContainer& SessionMaster::playlistContainer() {
+    if (m_playlistContainer.native() == 0) {
+        m_playlistContainer.setNative(sp_session_playlistcontainer(m_session));
+    }
+
+    return m_playlistContainer;
 }
 
 Player& SessionMaster::player() {

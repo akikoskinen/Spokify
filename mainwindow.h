@@ -73,8 +73,6 @@ public:
 
     bool isExiting() const;
 
-    sp_playlistcontainer *playlistContainer() const;
-
     static MainWindow *self();
 
     MainWidget *mainWidget() const;
@@ -174,8 +172,6 @@ private:
     bool                  m_isExiting;
 
     libspokify::Session  *m_session;
-
-    sp_playlistcontainer *m_pc;
 
     sp_playlist          *m_currentPlaylist;
 

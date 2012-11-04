@@ -10,6 +10,7 @@ struct sp_session;
 
 namespace libspokify {
 
+class PlaylistContainer;
 class Player;
 
 class Session : public QObject {
@@ -54,6 +55,8 @@ public:
 
     // Currently returns no error
     Error destroy();
+
+    PlaylistContainer& playlistContainer() const;
 
     Player& player();
 

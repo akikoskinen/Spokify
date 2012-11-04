@@ -6,6 +6,7 @@
 
 #include <libspotify/api.h>
 
+#include "PlaylistContainer.h"
 #include "Player.h"
 #include "Error.h"
 
@@ -64,6 +65,7 @@ public:
     static SessionMaster& get(sp_session* session);
     static void destroy(sp_session* session);
 
+    PlaylistContainer& playlistContainer();
     Player& player();
 
     void notifyLoggedIn(const Error &error);
@@ -90,6 +92,7 @@ private:
 
     static QMap<sp_session*, SessionMaster*> SessionMasters;
 
+    PlaylistContainer m_playlistContainer;
     SpokifyPlayer m_player;
 
 };

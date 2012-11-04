@@ -119,6 +119,10 @@ Error Session::destroy() {
     return Error();
 }
 
+PlaylistContainer& Session::playlistContainer() const {
+    return SessionMaster::get(session()).playlistContainer();
+}
+
 Player& Session::player() {
     return SessionMaster::get(session()).player();
 }

@@ -1,21 +1,22 @@
 #include "PlaylistContainer.h"
-#include "Session.h"
-
-#include <libspotify/api.h>
 
 namespace libspokify {
 
-PlaylistContainer::PlaylistContainer(const Session &session, QObject *parent) :
+PlaylistContainer::PlaylistContainer(QObject *parent) :
     QObject(parent),
-    m_session(session)
+    m_nativeContainer(0)
 {
 }
 
 PlaylistContainer::~PlaylistContainer() {
 }
 
+void PlaylistContainer::setNative(sp_playlistcontainer *native) {
+    m_nativeContainer = native;
+}
+
 sp_playlistcontainer* PlaylistContainer::native() const {
-    return sp_session_playlistcontainer(m_session.session());
+    return m_nativeContainer;
 }
 
 }

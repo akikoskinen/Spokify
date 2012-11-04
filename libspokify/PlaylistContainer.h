@@ -7,24 +7,22 @@ struct sp_playlistcontainer;
 
 namespace libspokify {
 
-class Session;
-
 class PlaylistContainer : public QObject {
     Q_OBJECT
 
 public:
-    /**
-     * Creates a playlist container object using the supplied \a session.
-     */
-    explicit PlaylistContainer(const Session &session, QObject *parent = 0);
+    explicit PlaylistContainer(QObject *parent = 0);
 
     virtual ~PlaylistContainer();
+
+    // TODO remove this from the public interface when the internal type is not needed anymore
+    void setNative(sp_playlistcontainer *native);
 
     // TODO remove this when the internal type is not needed anymore
     sp_playlistcontainer* native() const;
 
 private:
-    const Session &m_session;
+    sp_playlistcontainer *m_nativeContainer;
 };
 
 }
