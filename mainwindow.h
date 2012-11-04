@@ -112,8 +112,8 @@ public:
 
     bool hasChunk() const;
 
-    bool shuffle();
-    bool repeat();
+    bool shuffleIsOn() const;
+    bool repeatIsOn() const;
 
 public Q_SLOTS:
     void restoreStatusBarSlot();
@@ -141,19 +141,17 @@ private Q_SLOTS:
     void playSlot(const QModelIndex &index);
     void resumeSlot();
     void pausedOrStoppedSlot();
-    void shuffleSlot();
     void performSearch();
     void pcmWrittenSlot(const Chunk &chunk);
     void playlistChanged(const QItemSelection &selection);
     void searchHistoryChanged(const QItemSelection &selection);
     void seekPosition(int position);
-    void currentTrackFinishedSlot();
+    void nextTrackSlot();
     void playPlaylist(const QModelIndex &index);
     void playSearchHistory(const QModelIndex &index);
     void coverClickedSlot();
     void clearAllWidgets();
     void previousTrackSlot();
-    void nextTrackSlot();
     void setupScrobblingSlot();
 
 private:

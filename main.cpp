@@ -20,12 +20,15 @@
 #include <KCmdLineArgs>
 #include <KStandardDirs>
 #include <KUniqueApplication>
+#include <time.h>
  
 #include "mainwindow.h"
 #include "libspokify/Session.h"
 
 int main(int argc, char **argv)
 {
+    // Get a new seed when starting application
+    srand((unsigned)time(0));
     KAboutData aboutData("spokify", "spokify",
                          ki18n("Spokify"), "1.0",
                          ki18n("A Free Spotify Client"),
