@@ -90,7 +90,7 @@ private:
 
     static QMap<sp_session*, SessionMaster*> SessionMasters;
 
-    SpokifyPlayer *m_player;
+    SpokifyPlayer m_player;
 
 };
 

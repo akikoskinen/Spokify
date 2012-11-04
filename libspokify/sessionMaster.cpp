@@ -101,7 +101,7 @@ QMap<sp_session*, SessionMaster*> SessionMaster::SessionMasters;
 
 SessionMaster::SessionMaster(sp_session *session) :
     m_session(session),
-    m_player(new SpokifyPlayer(session, this))
+    m_player(session, this)
 {
 }
 
@@ -121,7 +121,7 @@ void SessionMaster::destroy(sp_session* session) {
 }
 
 Player& SessionMaster::player() {
-    return *m_player;
+    return m_player;
 }
 
 void SessionMaster::notifyLoggedIn(const Error &error) {
