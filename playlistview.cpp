@@ -113,7 +113,7 @@ void PlaylistView::newPlaylistSlot()
     playlistName->setFocus();
 
     if (dialog->exec() == KDialog::Accepted && !playlistName->text().isEmpty()) {
-        sp_playlistcontainer_add_new_playlist(m_playlistContainer.native(), playlistName->text().toUtf8().data());
+        m_playlistContainer.addPlaylist(playlistName->text());
     }
 }
 
@@ -147,6 +147,6 @@ void PlaylistView::deletePlaylistSlot()
     sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
     if (KMessageBox::questionYesNo(this, i18n("Are you sure that you want to delete the playlist \"%1\"?", QString::fromUtf8(sp_playlist_name(targetPlaylist))),
                                          i18n("Delete Playlist")) == KMessageBox::Yes) {
-        sp_playlistcontainer_remove_playlist(m_playlistContainer.native(), currentIndex().row());
+        m_playlistContainer.removePlaylist(currentIndex().row());
     }
 }

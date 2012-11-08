@@ -40,12 +40,38 @@ void cbContainerLoaded(sp_playlistcontainer *pc, void *userdata) {
 namespace libspokify {
 
 SpokifyPlaylistContainer::SpokifyPlaylistContainer(QObject *parent) :
-    PlaylistContainer(parent)
+    PlaylistContainer(parent),
+    m_nativeContainer(0)
 {
 }
 
 SpokifyPlaylistContainer::~SpokifyPlaylistContainer() {
     SpokifyPlaylistContainers.remove(m_nativeContainer);
+}
+
+bool SpokifyPlaylistContainer::addPlaylist(QString playlistName) {
+    sp_playlist* pl = sp_playlistcontainer_add_new_playlist(native(), playlistName.toUtf8().data());
+    return pl != NULL;
+}
+
+bool SpokifyPlaylistContainer::removePlaylist(int index) {
+    sp_error result = sp_playlistcontainer_remove_playlist(native(), index);
+    return result == SP_ERROR_OK;
+}
+
+QList<sp_playlist*> SpokifyPlaylistContainer::playlists() const {
+    int numPlaylists = sp_playlistcontainer_num_playlists(native());
+
+    // Collect the playlists that are of type "playlist", discard others
+    QList<sp_playlist*> playLists;
+    playLists.reserve(numPlaylists);
+    for (int i = 0; i < numPlaylists; ++i) {
+        if (sp_playlistcontainer_playlist_type(native(), i) == SP_PLAYLIST_TYPE_PLAYLIST) {
+            playLists.append(sp_playlistcontainer_playlist(native(), i));
+        }
+    }
+
+    return playLists;
 }
 
 void SpokifyPlaylistContainer::notifyPlaylistAdded(sp_playlist *playlist, int position) {
@@ -62,6 +88,10 @@ void SpokifyPlaylistContainer::notifyPlaylistMoved(sp_playlist *playlist, int fr
 
 void SpokifyPlaylistContainer::notifyContainerLoaded() {
     emit containerLoaded();
+}
+
+sp_playlistcontainer* SpokifyPlaylistContainer::native() const {
+    return m_nativeContainer;
 }
 
 void SpokifyPlaylistContainer::setNative(sp_playlistcontainer *native) {

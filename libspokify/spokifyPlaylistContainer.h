@@ -3,6 +3,8 @@
 
 #include "PlaylistContainer.h"
 
+struct sp_playlistcontainer;
+
 namespace libspokify {
 
 class SpokifyPlaylistContainer : public PlaylistContainer {
@@ -13,12 +15,22 @@ public:
 
     virtual ~SpokifyPlaylistContainer();
 
+    virtual bool addPlaylist(QString playlistName);
+
+    virtual bool removePlaylist(int index);
+
+    virtual QList<sp_playlist*> playlists() const;
+
     void notifyPlaylistAdded(sp_playlist *playlist, int position);
     void notifyPlaylistRemoved(sp_playlist *playlist, int position);
     void notifyPlaylistMoved(sp_playlist *playlist, int fromPosition, int toPosition);
     void notifyContainerLoaded();
 
+    sp_playlistcontainer* native() const;
     void setNative(sp_playlistcontainer *native);
+
+private:
+    sp_playlistcontainer *m_nativeContainer;
 
 };
 

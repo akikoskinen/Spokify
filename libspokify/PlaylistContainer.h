@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-struct sp_playlistcontainer;
 struct sp_playlist;
 
 namespace libspokify {
@@ -16,8 +15,19 @@ public:
 
     virtual ~PlaylistContainer();
 
-    // TODO remove this when the internal type is not needed anymore
-    sp_playlistcontainer* native() const;
+    /**
+     * Adds a new playlist to the playlist container.
+     * Returns \c true if the addition was successful, \c false if not.
+     */
+    virtual bool addPlaylist(QString playlistName) = 0;
+
+    /**
+     * Removes a playlist at \a index.
+     * Returns \c true if the removal was successful, \c false if not.
+     */
+    virtual bool removePlaylist(int index) = 0;
+
+    virtual QList<sp_playlist*> playlists() const = 0;
 
 Q_SIGNALS:
     void playlistAdded(sp_playlist *playlist, int position);
@@ -25,8 +35,6 @@ Q_SIGNALS:
     void playlistMoved(sp_playlist *playlist, int fromPosition, int toPosition);
     void containerLoaded();
 
-protected:
-    sp_playlistcontainer *m_nativeContainer;
 };
 
 }
