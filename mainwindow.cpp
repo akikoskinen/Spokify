@@ -716,7 +716,7 @@ void MainWindow::fillPlaylistModel()
         }
 
         const QModelIndex &index = m_playlistModel->index(i);
-        m_playlistModel->setData(index, QString::fromUtf8(sp_playlist_name(pl->native())));
+        m_playlistModel->setData(index, pl->name());
         m_playlistModel->setData(index, QVariant::fromValue<sp_playlist*>(pl->native()), PlaylistModel::SpotifyNativePlaylistRole);
 
         ++i;

@@ -15,6 +15,8 @@ public:
 
     virtual ~SpokifyPlaylist();
 
+    virtual QString name() const;
+
 };
 
 }
