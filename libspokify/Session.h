@@ -10,6 +10,7 @@ struct sp_session;
 
 namespace libspokify {
 
+class Playlist;
 class PlaylistContainer;
 class Player;
 
@@ -55,6 +56,8 @@ public:
 
     // Currently returns no error
     Error destroy();
+
+    Playlist* starredPlaylist() const;
 
     PlaylistContainer& playlistContainer() const;
 

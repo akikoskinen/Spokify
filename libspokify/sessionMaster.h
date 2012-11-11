@@ -50,6 +50,7 @@ private:
 
 };
 
+class Playlist;
 
 /**
  * A class that handles a single libspotify session. libspotify currently only
@@ -65,6 +66,7 @@ public:
     static SessionMaster& get(sp_session* session);
     static void destroy(sp_session* session);
 
+    Playlist* starredPlaylist() const;
     PlaylistContainer& playlistContainer();
     Player& player();
 
@@ -92,6 +94,7 @@ private:
 
     static QMap<sp_session*, SessionMaster*> SessionMasters;
 
+    mutable Playlist* m_starredPlaylist;
     SpokifyPlaylistContainer m_playlistContainer;
     SpokifyPlayer m_player;
 

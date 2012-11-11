@@ -34,6 +34,7 @@
 #include "libspokify/Error.h"
 #include "libspokify/Player.h"
 #include "libspokify/PlaylistContainer.h"
+#include "libspokify/Playlist.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QTimer>
@@ -688,16 +689,16 @@ void MainWindow::fillPlaylistModel()
 
     // Add the special playlist for starred tracks
     {
-        sp_playlist *pl = sp_session_starred_create(m_session->session());
+        Playlist *pl = m_session->starredPlaylist();
         Q_ASSERT(pl);
-        if (pl == m_currentPlaylist) {
+        if (pl->native() == m_currentPlaylist) {
             currRow = 0;
         }
 
-        sp_playlist_add_callbacks(pl, &SpotifyPlaylists::spotifyCallbacks, NULL);
+        sp_playlist_add_callbacks(pl->native(), &SpotifyPlaylists::spotifyCallbacks, NULL);
         const QModelIndex &index = m_playlistModel->index(0);
         m_playlistModel->setData(index, QChar(0x2605) + i18n("Starred tracks"));
-        m_playlistModel->setData(index, QVariant::fromValue<sp_playlist*>(pl), PlaylistModel::SpotifyNativePlaylistRole);
+        m_playlistModel->setData(index, QVariant::fromValue<sp_playlist*>(pl->native()), PlaylistModel::SpotifyNativePlaylistRole);
     }
     
     static QList<sp_playlist*> playlistsWithCallbacksSet;

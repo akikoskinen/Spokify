@@ -119,6 +119,10 @@ Error Session::destroy() {
     return Error();
 }
 
+Playlist* Session::starredPlaylist() const {
+    return SessionMaster::get(session()).starredPlaylist();
+}
+
 PlaylistContainer& Session::playlistContainer() const {
     return SessionMaster::get(session()).playlistContainer();
 }

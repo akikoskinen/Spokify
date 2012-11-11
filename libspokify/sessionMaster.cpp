@@ -2,6 +2,7 @@
 
 #include <QTimer>
 #include <libspotify/api.h>
+#include "spokifyplaylist.h"
 
 namespace libspokify {
 
@@ -100,6 +101,7 @@ QMap<sp_session*, SessionMaster*> SessionMaster::SessionMasters;
 
 SessionMaster::SessionMaster(sp_session *session) :
     m_session(session),
+    m_starredPlaylist(NULL),
     m_playlistContainer(this),
     m_player(session, this)
 {
@@ -118,6 +120,17 @@ SessionMaster& SessionMaster::get(sp_session* session) {
 
 void SessionMaster::destroy(sp_session* session) {
     delete SessionMasters.take(session);
+}
+
+Playlist* SessionMaster::starredPlaylist() const {
+    if (m_starredPlaylist == 0) {
+        sp_playlist *starred = sp_session_starred_create(m_session);
+        if (starred != 0) {
+            m_starredPlaylist = new SpokifyPlaylist(starred, const_cast<SessionMaster*>(this));
+        }
+    }
+
+    return m_starredPlaylist;
 }
 
 PlaylistContainer& SessionMaster::playlistContainer() {

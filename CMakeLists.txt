@@ -42,7 +42,9 @@ list(APPEND spokify_SRCS
     ${LIBSPOKIFY_DIR}/Session.cpp
     ${LIBSPOKIFY_DIR}/sessionMaster.cpp
     ${LIBSPOKIFY_DIR}/Player.cpp
+    ${LIBSPOKIFY_DIR}/Playlist.cpp
     ${LIBSPOKIFY_DIR}/PlaylistContainer.cpp
+    ${LIBSPOKIFY_DIR}/spokifyplaylist.cpp
     ${LIBSPOKIFY_DIR}/spokifyPlaylistContainer.cpp)
 
 kde4_add_executable(spokify ${spokify_SRCS})
