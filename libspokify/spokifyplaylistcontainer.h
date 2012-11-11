@@ -19,8 +19,6 @@ public:
 
     virtual bool removePlaylist(int index);
 
-    virtual QList<sp_playlist*> playlists() const;
-
     void notifyPlaylistAdded(sp_playlist *playlist, int position);
     void notifyPlaylistRemoved(sp_playlist *playlist, int position);
     void notifyPlaylistMoved(sp_playlist *playlist, int fromPosition, int toPosition);
@@ -29,6 +27,8 @@ public:
     sp_playlistcontainer* native() const;
 
 private:
+    void updatePlaylists();
+
     sp_playlistcontainer *m_nativeContainer;
 
 };

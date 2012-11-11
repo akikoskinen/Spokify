@@ -10,4 +10,8 @@ PlaylistContainer::PlaylistContainer(QObject *parent) :
 PlaylistContainer::~PlaylistContainer() {
 }
 
+QList<Playlist*> PlaylistContainer::playlists() const {
+    return m_playlists;
+}
+
 }

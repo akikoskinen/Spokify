@@ -3,6 +3,8 @@
 #include <libspotify/api.h>
 #include <QMap>
 
+#include "spokifyplaylist.h"
+
 static QMap<sp_playlistcontainer*, libspokify::SpokifyPlaylistContainer*> SpokifyPlaylistContainers;
 
 void cbPlaylistAdded(sp_playlistcontainer *pc, sp_playlist *playlist, int position, void *userdata) {
@@ -69,35 +71,42 @@ bool SpokifyPlaylistContainer::removePlaylist(int index) {
     return result == SP_ERROR_OK;
 }
 
-QList<sp_playlist*> SpokifyPlaylistContainer::playlists() const {
-    int numPlaylists = sp_playlistcontainer_num_playlists(native());
-
-    // Collect the playlists that are of type "playlist", discard others
-    QList<sp_playlist*> playLists;
-    playLists.reserve(numPlaylists);
-    for (int i = 0; i < numPlaylists; ++i) {
-        if (sp_playlistcontainer_playlist_type(native(), i) == SP_PLAYLIST_TYPE_PLAYLIST) {
-            playLists.append(sp_playlistcontainer_playlist(native(), i));
-        }
-    }
-
-    return playLists;
-}
-
 void SpokifyPlaylistContainer::notifyPlaylistAdded(sp_playlist *playlist, int position) {
+    updatePlaylists();
+
     emit playlistAdded(playlist, position);
 }
 
 void SpokifyPlaylistContainer::notifyPlaylistRemoved(sp_playlist *playlist, int position) {
+    updatePlaylists();
+
     emit playlistRemoved(playlist, position);
 }
 
 void SpokifyPlaylistContainer::notifyPlaylistMoved(sp_playlist *playlist, int fromPosition, int toPosition) {
+    updatePlaylists();
+
     emit playlistMoved(playlist, fromPosition, toPosition);
 }
 
 void SpokifyPlaylistContainer::notifyContainerLoaded() {
+    updatePlaylists();
+
     emit containerLoaded();
+}
+
+void SpokifyPlaylistContainer::updatePlaylists() {
+    int numPlaylists = sp_playlistcontainer_num_playlists(native());
+
+    qDeleteAll(m_playlists);
+    m_playlists.clear();
+    m_playlists.reserve(numPlaylists);
+    // Collect the playlists that are of type "playlist", discard others
+    for (int i = 0; i < numPlaylists; ++i) {
+        if (sp_playlistcontainer_playlist_type(native(), i) == SP_PLAYLIST_TYPE_PLAYLIST) {
+            m_playlists.append(new SpokifyPlaylist(sp_playlistcontainer_playlist(native(), i)));
+        }
+    }
 }
 
 sp_playlistcontainer* SpokifyPlaylistContainer::native() const {

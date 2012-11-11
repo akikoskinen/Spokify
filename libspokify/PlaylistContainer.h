@@ -7,6 +7,8 @@ struct sp_playlist;
 
 namespace libspokify {
 
+class Playlist;
+
 class PlaylistContainer : public QObject {
     Q_OBJECT
 
@@ -27,13 +29,16 @@ public:
      */
     virtual bool removePlaylist(int index) = 0;
 
-    virtual QList<sp_playlist*> playlists() const = 0;
+    virtual QList<Playlist*> playlists() const;
 
 Q_SIGNALS:
     void playlistAdded(sp_playlist *playlist, int position);
     void playlistRemoved(sp_playlist *playlist, int position);
     void playlistMoved(sp_playlist *playlist, int fromPosition, int toPosition);
     void containerLoaded();
+
+protected:
+    QList<Playlist*> m_playlists;
 
 };
 
