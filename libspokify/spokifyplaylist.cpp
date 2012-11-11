@@ -17,4 +17,8 @@ QString SpokifyPlaylist::name() const {
     return QString::fromUtf8(sp_playlist_name(native()));
 }
 
+void SpokifyPlaylist::rename(QString newName) {
+    sp_playlist_rename(native(), newName.toUtf8().data());
+}
+
 }

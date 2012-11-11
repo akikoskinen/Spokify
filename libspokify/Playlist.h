@@ -17,6 +17,8 @@ public:
 
     virtual QString name() const = 0;
 
+    virtual void rename(QString newName) = 0;
+
     // TODO remove this from the public interface when it's not needed anymore
     sp_playlist* native() const;
 

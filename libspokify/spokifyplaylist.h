@@ -17,6 +17,7 @@ public:
 
     virtual QString name() const;
 
+    virtual void rename(QString newName);
 };
 
 }

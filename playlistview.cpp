@@ -128,7 +128,7 @@ void PlaylistView::newPlaylistSlot()
 
 void PlaylistView::renamePlaylistSlot()
 {
-    sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
+    Playlist *targetPlaylist = currentIndex().data(PlaylistModel::PlaylistRole).value<Playlist*>();
 
     KDialog *dialog = new KDialog(this);
     dialog->setCaption(i18n("Rename Playlist"));
@@ -136,26 +136,26 @@ void PlaylistView::renamePlaylistSlot()
 
     QWidget *widget = new QWidget(dialog);
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(new QLabel(i18n("Choose a new name for the playlist \"%1\":", QString::fromUtf8(sp_playlist_name(targetPlaylist))), widget));
+    layout->addWidget(new QLabel(i18n("Choose a new name for the playlist \"%1\":", targetPlaylist->name()), widget));
     KLineEdit *playlistName = new KLineEdit(widget);
     playlistName->setClearButtonShown(true);
-    playlistName->setText(QString::fromUtf8(sp_playlist_name(targetPlaylist)));
+    playlistName->setText(targetPlaylist->name());
     layout->addWidget(playlistName);
     widget->setLayout(layout);
     dialog->setMainWidget(widget);
     playlistName->selectAll();
     playlistName->setFocus();
 
-    if (dialog->exec() == KDialog::Accepted && !playlistName->text().isEmpty()) {
-        sp_playlist_rename(targetPlaylist, playlistName->text().toUtf8().data());
+    if (dialog->exec() == KDialog::Accepted) {
+        targetPlaylist->rename(playlistName->text());
     }
 }
 
 void PlaylistView::deletePlaylistSlot()
 {
     if (m_playlistContainer != 0) {
-        sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
-        if (KMessageBox::questionYesNo(this, i18n("Are you sure that you want to delete the playlist \"%1\"?", QString::fromUtf8(sp_playlist_name(targetPlaylist))),
+        Playlist *targetPlaylist = currentIndex().data(PlaylistModel::PlaylistRole).value<Playlist*>();
+        if (KMessageBox::questionYesNo(this, i18n("Are you sure that you want to delete the playlist \"%1\"?", targetPlaylist->name()),
                                              i18n("Delete Playlist")) == KMessageBox::Yes) {
             m_playlistContainer->removePlaylist(currentIndex().row());
         }
