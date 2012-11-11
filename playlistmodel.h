@@ -22,14 +22,16 @@
 #include <QtCore/QList>
 #include <QtCore/QAbstractListModel>
 
-struct sp_playlist;
+namespace libspokify {
+class Playlist;
+}
 
 class PlaylistModel
     : public QAbstractListModel
 {
 public:
     enum OwnRoles {
-        SpotifyNativePlaylistRole = Qt::UserRole
+        PlaylistRole = Qt::UserRole
     };
 
     PlaylistModel(QObject *parent = 0);
@@ -49,12 +51,12 @@ private:
             m_playlist(0)
         {}
 
-        QString      m_title;
-        sp_playlist *m_playlist;
+        QString m_title;
+        libspokify::Playlist *m_playlist;
     };
     QList<Entry> m_playLists;
 };
 
-Q_DECLARE_METATYPE(sp_playlist*)
+Q_DECLARE_METATYPE(libspokify::Playlist*)
 
 #endif

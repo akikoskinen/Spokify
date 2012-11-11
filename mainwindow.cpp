@@ -699,7 +699,7 @@ void MainWindow::fillPlaylistModel()
         sp_playlist_add_callbacks(pl->native(), &SpotifyPlaylists::spotifyCallbacks, NULL);
         const QModelIndex &index = m_playlistModel->index(0);
         m_playlistModel->setData(index, QChar(0x2605) + i18n("Starred tracks"));
-        m_playlistModel->setData(index, QVariant::fromValue<sp_playlist*>(pl->native()), PlaylistModel::SpotifyNativePlaylistRole);
+        m_playlistModel->setData(index, QVariant::fromValue<Playlist*>(pl), PlaylistModel::PlaylistRole);
     }
     
     static QList<sp_playlist*> playlistsWithCallbacksSet;
@@ -717,7 +717,7 @@ void MainWindow::fillPlaylistModel()
 
         const QModelIndex &index = m_playlistModel->index(i);
         m_playlistModel->setData(index, pl->name());
-        m_playlistModel->setData(index, QVariant::fromValue<sp_playlist*>(pl->native()), PlaylistModel::SpotifyNativePlaylistRole);
+        m_playlistModel->setData(index, QVariant::fromValue<Playlist*>(pl), PlaylistModel::PlaylistRole);
 
         ++i;
     }
@@ -871,7 +871,7 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
 
     m_searchHistoryView->setCurrentIndex(QModelIndex());
 
-    sp_playlist *const curr = index.data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
+    sp_playlist *const curr = index.data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
     MainWidget::Collection &c = m_mainWidget->collection(curr);
     m_currentPlaylist = curr;
     if (c.needsToBeFilled) {
@@ -970,7 +970,7 @@ void MainWindow::seekPosition(int position)
 
 void MainWindow::playPlaylist(const QModelIndex &index)
 {
-    sp_playlist *playlist = index.data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
+    sp_playlist *playlist = index.data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
     if (!sp_playlist_num_tracks(playlist)) {
         return;
     }
@@ -1008,7 +1008,7 @@ void MainWindow::coverClickedSlot()
         MainWidget::Collection *const c = m_mainWidget->currentPlayingCollection();
         for (int i = 0; i < m_playlistModel->rowCount(); ++i) {
             const QModelIndex index = m_playlistModel->index(i, 0);
-            sp_playlist *const playlist = m_playlistModel->data(index, PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
+            sp_playlist *const playlist = m_playlistModel->data(index, PlaylistModel::PlaylistRole).value<Playlist*>()->native();
             if (c == &m_mainWidget->collection(playlist)) {
                 m_playlistView->setCurrentIndex(index);
                 m_searchHistoryView->setCurrentIndex(QModelIndex());

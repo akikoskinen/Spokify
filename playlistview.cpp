@@ -21,6 +21,7 @@
 #include "playlistmodel.h"
 #include "libspokify/Session.h"
 #include "libspokify/PlaylistContainer.h"
+#include "libspokify/Playlist.h"
 
 #include <libspotify/api.h>
 
@@ -35,6 +36,8 @@
 #include <KDialog>
 #include <KLineEdit>
 #include <KMessageBox>
+
+using namespace libspokify;
 
 PlaylistView::PlaylistView(QWidget *parent)
     : QListView(parent)
@@ -58,7 +61,7 @@ PlaylistView::~PlaylistView()
 {
 }
 
-void PlaylistView::setPlaylistContainer(libspokify::PlaylistContainer *playlistContainer) {
+void PlaylistView::setPlaylistContainer(PlaylistContainer *playlistContainer) {
     m_playlistContainer = playlistContainer;
 }
 
@@ -86,8 +89,8 @@ void PlaylistView::dropEvent(QDropEvent *event)
     }
     const MimeData *mimeData = static_cast<const MimeData*>(event->mimeData());
     sp_track* const trackToAdd[] = { mimeData->track() };
-    sp_playlist *targetPlaylist = target.data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
-    sp_playlist_add_tracks(targetPlaylist, trackToAdd, 1, sp_playlist_num_tracks(targetPlaylist), libspokify::Session().session());
+    sp_playlist *targetPlaylist = target.data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
+    sp_playlist_add_tracks(targetPlaylist, trackToAdd, 1, sp_playlist_num_tracks(targetPlaylist), Session().session());
 }
 
 void PlaylistView::contextMenuEvent(QContextMenuEvent *event)
@@ -125,7 +128,7 @@ void PlaylistView::newPlaylistSlot()
 
 void PlaylistView::renamePlaylistSlot()
 {
-    sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
+    sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
 
     KDialog *dialog = new KDialog(this);
     dialog->setCaption(i18n("Rename Playlist"));
@@ -151,7 +154,7 @@ void PlaylistView::renamePlaylistSlot()
 void PlaylistView::deletePlaylistSlot()
 {
     if (m_playlistContainer != 0) {
-        sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
+        sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
         if (KMessageBox::questionYesNo(this, i18n("Are you sure that you want to delete the playlist \"%1\"?", QString::fromUtf8(sp_playlist_name(targetPlaylist))),
                                              i18n("Delete Playlist")) == KMessageBox::Yes) {
             m_playlistContainer->removePlaylist(currentIndex().row());
