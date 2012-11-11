@@ -11,7 +11,7 @@ class SpokifyPlaylistContainer : public PlaylistContainer {
     Q_OBJECT
 
 public:
-    explicit SpokifyPlaylistContainer(QObject *parent = 0);
+    explicit SpokifyPlaylistContainer(sp_playlistcontainer *native, QObject *parent = 0);
 
     virtual ~SpokifyPlaylistContainer();
 
@@ -27,7 +27,6 @@ public:
     void notifyContainerLoaded();
 
     sp_playlistcontainer* native() const;
-    void setNative(sp_playlistcontainer *native);
 
 private:
     sp_playlistcontainer *m_nativeContainer;

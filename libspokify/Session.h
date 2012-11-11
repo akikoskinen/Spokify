@@ -59,7 +59,7 @@ public:
 
     Playlist* starredPlaylist() const;
 
-    PlaylistContainer& playlistContainer() const;
+    PlaylistContainer* playlistContainer() const;
 
     Player& player();
 

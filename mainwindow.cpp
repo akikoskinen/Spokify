@@ -372,18 +372,12 @@ MainWindow::MainWindow(QWidget *parent)
         connect(m_session, SIGNAL(metadataUpdated()), this, SLOT(fillPlaylistModel()));
         connect(m_session, SIGNAL(playTokenLost()), this, SLOT(spotifyPlayTokenLost()));
         connect(m_session, SIGNAL(endOfTrack()), this, SLOT(endOfTrack()));
-
-        PlaylistContainer &sessionPlaylistContainer = m_session->playlistContainer();
-        connect(&sessionPlaylistContainer, SIGNAL(containerLoaded()), this, SLOT(fillPlaylistModel()));
-        connect(&sessionPlaylistContainer, SIGNAL(playlistAdded(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
-        connect(&sessionPlaylistContainer, SIGNAL(playlistMoved(sp_playlist*,int,int)), this, SLOT(fillPlaylistModel()));
-        connect(&sessionPlaylistContainer, SIGNAL(playlistRemoved(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
     }
     //END: Spotify session init
 
     //BEGIN: set up playlists widget
     {
-        m_playlistView = new PlaylistView(m_session->playlistContainer(), this);
+        m_playlistView = new PlaylistView(this);
         m_playlistView->setAlternatingRowColors(true);
         m_playlistView->setEditTriggers(QAbstractItemView::NoEditTriggers);
         m_playlistView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -522,10 +516,17 @@ void MainWindow::spotifyLoggedIn(const Error &error)
     if (error.type() == Error::ERROR_OK) {
         showTemporaryMessage(i18n("Logged in"));
 
+        PlaylistContainer *sessionPlaylistContainer = m_session->playlistContainer();
+        connect(sessionPlaylistContainer, SIGNAL(containerLoaded()), this, SLOT(fillPlaylistModel()));
+        connect(sessionPlaylistContainer, SIGNAL(playlistAdded(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
+        connect(sessionPlaylistContainer, SIGNAL(playlistMoved(sp_playlist*,int,int)), this, SLOT(fillPlaylistModel()));
+        connect(sessionPlaylistContainer, SIGNAL(playlistRemoved(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
+
         m_loggedIn = true;
         m_login->setVisible(false);
         m_login->setEnabled(true);
         m_logout->setVisible(true);
+        m_playlistView->setPlaylistContainer(sessionPlaylistContainer);
         m_playlistView->setEnabled(true);
         m_searchHistoryView->setEnabled(true);
         m_searchCategory->setEnabled(true);
@@ -680,7 +681,7 @@ void MainWindow::endOfTrack()
 
 void MainWindow::fillPlaylistModel()
 {
-    QList<sp_playlist*> playLists = m_session->playlistContainer().playlists();
+    QList<sp_playlist*> playLists = m_session->playlistContainer()->playlists();
 
     m_playlistModel->removeRows(0, m_playlistModel->rowCount());
     m_playlistModel->insertRows(0, 1 + playLists.count());  // 1 place needed for the starred tracks list

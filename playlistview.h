@@ -33,8 +33,10 @@ class PlaylistView
     Q_OBJECT
 
 public:
-    PlaylistView(libspokify::PlaylistContainer &playlistContainer, QWidget *parent = 0);
+    PlaylistView(QWidget *parent = 0);
     virtual ~PlaylistView();
+
+    void setPlaylistContainer(libspokify::PlaylistContainer *playlistContainer);
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *event);
@@ -48,7 +50,7 @@ private Q_SLOTS:
     void deletePlaylistSlot();
 
 private:
-    libspokify::PlaylistContainer &m_playlistContainer;
+    libspokify::PlaylistContainer *m_playlistContainer;
     KMenu *m_contextMenu;
     KMenu *m_contextMenuEmpty;
 };

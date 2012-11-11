@@ -101,8 +101,8 @@ QMap<sp_session*, SessionMaster*> SessionMaster::SessionMasters;
 
 SessionMaster::SessionMaster(sp_session *session) :
     m_session(session),
-    m_starredPlaylist(NULL),
-    m_playlistContainer(this),
+    m_playlistContainer(0),
+    m_starredPlaylist(0),
     m_player(session, this)
 {
 }
@@ -133,14 +133,7 @@ Playlist* SessionMaster::starredPlaylist() const {
     return m_starredPlaylist;
 }
 
-PlaylistContainer& SessionMaster::playlistContainer() {
-    if (m_playlistContainer.native() == 0) {
-        sp_playlistcontainer *plc = sp_session_playlistcontainer(m_session);
-        if (plc != 0) {
-            m_playlistContainer.setNative(plc);
-        }
-    }
-
+PlaylistContainer* SessionMaster::playlistContainer() {
     return m_playlistContainer;
 }
 
@@ -149,10 +142,20 @@ Player& SessionMaster::player() {
 }
 
 void SessionMaster::notifyLoggedIn(const Error &error) {
+    if (m_playlistContainer == 0) {
+        sp_playlistcontainer *plc = sp_session_playlistcontainer(m_session);
+        if (plc != 0) {
+            m_playlistContainer = new SpokifyPlaylistContainer(plc, this);
+        }
+    }
+
     emit loggedIn(error);
 }
 
 void SessionMaster::notifyLoggedOut() {
+    delete m_playlistContainer;
+    m_playlistContainer = 0;
+
     emit loggedOut();
 }
 

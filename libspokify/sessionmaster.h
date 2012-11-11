@@ -67,7 +67,7 @@ public:
     static void destroy(sp_session* session);
 
     Playlist* starredPlaylist() const;
-    PlaylistContainer& playlistContainer();
+    PlaylistContainer* playlistContainer();
     Player& player();
 
     void notifyLoggedIn(const Error &error);
@@ -94,8 +94,8 @@ private:
 
     static QMap<sp_session*, SessionMaster*> SessionMasters;
 
+    SpokifyPlaylistContainer* m_playlistContainer;
     mutable Playlist* m_starredPlaylist;
-    SpokifyPlaylistContainer m_playlistContainer;
     SpokifyPlayer m_player;
 
 };

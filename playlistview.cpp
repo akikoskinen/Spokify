@@ -36,9 +36,9 @@
 #include <KLineEdit>
 #include <KMessageBox>
 
-PlaylistView::PlaylistView(libspokify::PlaylistContainer &playlistContainer, QWidget *parent)
+PlaylistView::PlaylistView(QWidget *parent)
     : QListView(parent)
-    , m_playlistContainer(playlistContainer)
+    , m_playlistContainer(0)
     , m_contextMenu(new KMenu(this))
     , m_contextMenuEmpty(new KMenu(this))
 {
@@ -56,6 +56,10 @@ PlaylistView::PlaylistView(libspokify::PlaylistContainer &playlistContainer, QWi
 
 PlaylistView::~PlaylistView()
 {
+}
+
+void PlaylistView::setPlaylistContainer(libspokify::PlaylistContainer *playlistContainer) {
+    m_playlistContainer = playlistContainer;
 }
 
 void PlaylistView::dragEnterEvent(QDragEnterEvent *event)
@@ -91,29 +95,31 @@ void PlaylistView::contextMenuEvent(QContextMenuEvent *event)
     const QModelIndex index = indexAt(event->pos());
     if (index.isValid()) {
         m_contextMenu->popup(QPoint(event->globalX(), event->globalY()));
-    } else {
+    } else if (m_playlistContainer != 0) {
         m_contextMenuEmpty->popup(QPoint(event->globalX(), event->globalY()));
     }
 }
 
 void PlaylistView::newPlaylistSlot()
 {
-    KDialog *dialog = new KDialog(this);
-    dialog->setCaption(i18n("New Playlist"));
-    dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+    if (m_playlistContainer != 0) {
+        KDialog *dialog = new KDialog(this);
+        dialog->setCaption(i18n("New Playlist"));
+        dialog->setButtons(KDialog::Ok | KDialog::Cancel);
 
-    QWidget *widget = new QWidget(dialog);
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(new QLabel(i18n("Choose a name for the new playlist:"), widget));
-    KLineEdit *playlistName = new KLineEdit(widget);
-    playlistName->setClearButtonShown(true);
-    layout->addWidget(playlistName);
-    widget->setLayout(layout);
-    dialog->setMainWidget(widget);
-    playlistName->setFocus();
+        QWidget *widget = new QWidget(dialog);
+        QVBoxLayout *layout = new QVBoxLayout;
+        layout->addWidget(new QLabel(i18n("Choose a name for the new playlist:"), widget));
+        KLineEdit *playlistName = new KLineEdit(widget);
+        playlistName->setClearButtonShown(true);
+        layout->addWidget(playlistName);
+        widget->setLayout(layout);
+        dialog->setMainWidget(widget);
+        playlistName->setFocus();
 
-    if (dialog->exec() == KDialog::Accepted && !playlistName->text().isEmpty()) {
-        m_playlistContainer.addPlaylist(playlistName->text());
+        if (dialog->exec() == KDialog::Accepted && !playlistName->text().isEmpty()) {
+            m_playlistContainer->addPlaylist(playlistName->text());
+        }
     }
 }
 
@@ -144,9 +150,11 @@ void PlaylistView::renamePlaylistSlot()
 
 void PlaylistView::deletePlaylistSlot()
 {
-    sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
-    if (KMessageBox::questionYesNo(this, i18n("Are you sure that you want to delete the playlist \"%1\"?", QString::fromUtf8(sp_playlist_name(targetPlaylist))),
-                                         i18n("Delete Playlist")) == KMessageBox::Yes) {
-        m_playlistContainer.removePlaylist(currentIndex().row());
+    if (m_playlistContainer != 0) {
+        sp_playlist *targetPlaylist = currentIndex().data(PlaylistModel::SpotifyNativePlaylistRole).value<sp_playlist*>();
+        if (KMessageBox::questionYesNo(this, i18n("Are you sure that you want to delete the playlist \"%1\"?", QString::fromUtf8(sp_playlist_name(targetPlaylist))),
+                                             i18n("Delete Playlist")) == KMessageBox::Yes) {
+            m_playlistContainer->removePlaylist(currentIndex().row());
+        }
     }
 }

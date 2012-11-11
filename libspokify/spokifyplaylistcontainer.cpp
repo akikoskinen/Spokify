@@ -39,10 +39,20 @@ void cbContainerLoaded(sp_playlistcontainer *pc, void *userdata) {
 
 namespace libspokify {
 
-SpokifyPlaylistContainer::SpokifyPlaylistContainer(QObject *parent) :
+SpokifyPlaylistContainer::SpokifyPlaylistContainer(sp_playlistcontainer *native, QObject *parent) :
     PlaylistContainer(parent),
-    m_nativeContainer(0)
+    m_nativeContainer(native)
 {
+    Q_ASSERT(m_nativeContainer != 0);
+
+    sp_playlistcontainer_callbacks callbacks;
+    callbacks.playlist_added = &cbPlaylistAdded;
+    callbacks.playlist_removed = &cbPlaylistRemoved;
+    callbacks.playlist_moved = &cbPlaylistMoved;
+    callbacks.container_loaded = &cbContainerLoaded;
+    sp_playlistcontainer_add_callbacks(m_nativeContainer, &callbacks, NULL);
+
+    SpokifyPlaylistContainers.insert(m_nativeContainer, this);
 }
 
 SpokifyPlaylistContainer::~SpokifyPlaylistContainer() {
@@ -92,21 +102,6 @@ void SpokifyPlaylistContainer::notifyContainerLoaded() {
 
 sp_playlistcontainer* SpokifyPlaylistContainer::native() const {
     return m_nativeContainer;
-}
-
-void SpokifyPlaylistContainer::setNative(sp_playlistcontainer *native) {
-    if (native != 0) {
-        m_nativeContainer = native;
-
-        sp_playlistcontainer_callbacks callbacks;
-        callbacks.playlist_added = &cbPlaylistAdded;
-        callbacks.playlist_removed = &cbPlaylistRemoved;
-        callbacks.playlist_moved = &cbPlaylistMoved;
-        callbacks.container_loaded = &cbContainerLoaded;
-        sp_playlistcontainer_add_callbacks(m_nativeContainer, &callbacks, NULL);
-
-        SpokifyPlaylistContainers.insert(m_nativeContainer, this);
-    }
 }
 
 }
