@@ -1,4 +1,4 @@
-#include "sessionMaster.h"
+#include "sessionmaster.h"
 
 #include <QTimer>
 #include <libspotify/api.h>

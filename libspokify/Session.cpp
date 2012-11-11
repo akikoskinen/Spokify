@@ -1,5 +1,5 @@
 #include "Session.h"
-#include "sessionMaster.h"
+#include "sessionmaster.h"
 
 #include "libspotify/api.h"
 

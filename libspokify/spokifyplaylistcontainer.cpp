@@ -1,4 +1,4 @@
-#include "spokifyPlaylistContainer.h"
+#include "spokifyplaylistcontainer.h"
 
 #include <libspotify/api.h>
 #include <QMap>

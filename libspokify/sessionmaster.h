@@ -6,7 +6,7 @@
 
 #include <libspotify/api.h>
 
-#include "spokifyPlaylistContainer.h"
+#include "spokifyplaylistcontainer.h"
 #include "Player.h"
 #include "Error.h"
 
