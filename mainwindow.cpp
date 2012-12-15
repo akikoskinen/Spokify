@@ -800,7 +800,7 @@ void MainWindow::searchResults(libspokify::SearchResults *results)
         }
         {
             const QModelIndex &index = trackModel->index(i, TrackModel::Title);
-            trackModel->setData(index, QString::fromUtf8(sp_track_name(tr)));
+            trackModel->setData(index, track.name());
         }
         {
             const QModelIndex &index = trackModel->index(i, TrackModel::Artist);
@@ -874,7 +874,7 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
             }
             {
                 const QModelIndex &index = trackModel->index(i, TrackModel::Title);
-                trackModel->setData(index, QString::fromUtf8(sp_track_name(tr)));
+                trackModel->setData(index, track.name());
             }
             {
                 const QModelIndex &index = trackModel->index(i, TrackModel::Artist);
@@ -1089,8 +1089,7 @@ void MainWindow::play(const Track &track)
 
     // Set the currently playing song
     QString artist = QString::fromUtf8(sp_artist_name(sp_track_artist(track.native(), 0)));
-    QString trackName = QString::fromUtf8(sp_track_name(track.native()));
-    emit nowPlaying(artist, trackName, track.duration());
+    emit nowPlaying(artist, track.name(), track.duration());
 
     m_playCondition.wakeAll();
 }

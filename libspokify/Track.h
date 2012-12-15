@@ -23,6 +23,8 @@ public:
 
     bool isValid() const;
 
+    QString name() const;
+
     /**
      * Returns the duration of the track in milliseconds.
      */

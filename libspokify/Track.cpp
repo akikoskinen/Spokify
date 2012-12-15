@@ -21,6 +21,14 @@ bool TrackPrivate::isValid() const {
     return m_native != NULL;
 }
 
+QString TrackPrivate::name() const {
+    QString ret;
+    if (isValid()) {
+        ret = QString::fromUtf8(sp_track_name(m_native));
+    }
+    return ret;
+}
+
 int TrackPrivate::duration() const {
     int dur = 0;
     if (isValid()) {
@@ -62,6 +70,11 @@ bool Track::operator==(const Track &other) const {
 bool Track::isValid() const {
     Q_D(const Track);
     return d->isValid();
+}
+
+QString Track::name() const {
+    Q_D(const Track);
+    return d->name();
 }
 
 int Track::duration() const {

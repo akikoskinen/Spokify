@@ -15,6 +15,8 @@ public:
 
     bool isValid() const;
 
+    QString name() const;
+
     int duration() const;
 
     sp_track *m_native;

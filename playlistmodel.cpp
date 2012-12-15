@@ -120,7 +120,7 @@ bool PlaylistModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         return false;
     }
 
-    kDebug() << "dropping track name" << QString::fromUtf8(sp_track_name(tr.native()));
+    kDebug() << "dropping track name" << tr.name();
 
     return true;
 }
