@@ -2,33 +2,40 @@
 #define LIBSPOKIFY_PLAYLIST_H
 
 #include <QObject>
+#include <QScopedPointer>
+
 #include "Track.h"
 
 struct sp_playlist;
 
 namespace libspokify {
 
+class PlaylistPrivate;
+
 class Playlist : public QObject {
     Q_OBJECT
 
 public:
-    explicit Playlist(QObject *parent = 0);
-
     virtual ~Playlist();
 
-    virtual QString name() const = 0;
+    QString name() const;
 
-    virtual void rename(QString newName) = 0;
+    void rename(QString newName);
 
     QList<Track> tracks() const;
 
     // TODO remove this from the public interface when it's not needed anymore
     sp_playlist* native() const;
 
-protected:
-    QList<Track> m_tracks;
+private:
+    explicit Playlist(PlaylistPrivate &p, QObject *parent = 0);
 
-    sp_playlist *m_nativePlaylist;
+    QScopedPointer<PlaylistPrivate> d_ptr;
+    Q_DECLARE_PRIVATE(Playlist)
+
+    Q_DISABLE_COPY(Playlist)
+
+    friend class SpokifyConstructor;
 
 };
 

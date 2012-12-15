@@ -48,7 +48,6 @@ list(APPEND spokify_SRCS
     ${LIBSPOKIFY_DIR}/SearchResults.cpp
     ${LIBSPOKIFY_DIR}/Track.cpp
     ${LIBSPOKIFY_DIR}/spokifyconstructor.cpp
-    ${LIBSPOKIFY_DIR}/spokifyplaylist.cpp
     ${LIBSPOKIFY_DIR}/spokifyplaylistcontainer.cpp
     ${LIBSPOKIFY_DIR}/spokifysearch.cpp)
 

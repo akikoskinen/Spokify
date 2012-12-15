@@ -2,8 +2,10 @@
 
 #include <QTimer>
 #include <libspotify/api.h>
-#include "spokifyplaylist.h"
+
+#include "Track.h"
 #include "track_p.h"
+#include "spokifyconstructor.h"
 
 namespace libspokify {
 
@@ -127,7 +129,7 @@ Playlist* SessionMaster::starredPlaylist() const {
     if (m_starredPlaylist == 0) {
         sp_playlist *starred = sp_session_starred_create(m_session);
         if (starred != 0) {
-            m_starredPlaylist = new SpokifyPlaylist(starred, const_cast<SessionMaster*>(this));
+            m_starredPlaylist = SpokifyConstructor::newPlaylist(starred, const_cast<SessionMaster*>(this));
         }
     }
 

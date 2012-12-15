@@ -1,7 +1,7 @@
 #ifndef SPOKIFYTRACK_P_H
 #define SPOKIFYTRACK_P_H
 
-#include "Track.h"
+struct sp_track;
 
 namespace libspokify {
 

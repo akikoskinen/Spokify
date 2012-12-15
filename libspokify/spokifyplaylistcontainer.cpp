@@ -3,7 +3,7 @@
 #include <libspotify/api.h>
 #include <QMap>
 
-#include "spokifyplaylist.h"
+#include "spokifyconstructor.h"
 
 static QMap<sp_playlistcontainer*, libspokify::SpokifyPlaylistContainer*> SpokifyPlaylistContainers;
 
@@ -104,7 +104,7 @@ void SpokifyPlaylistContainer::updatePlaylists() {
     // Collect the playlists that are of type "playlist", discard others
     for (int i = 0; i < numPlaylists; ++i) {
         if (sp_playlistcontainer_playlist_type(native(), i) == SP_PLAYLIST_TYPE_PLAYLIST) {
-            m_playlists.append(new SpokifyPlaylist(sp_playlistcontainer_playlist(native(), i)));
+            m_playlists.append(SpokifyConstructor::newPlaylist(sp_playlistcontainer_playlist(native(), i)));
         }
     }
 }
