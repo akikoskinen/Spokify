@@ -22,9 +22,7 @@
 #include <QtCore/QList>
 #include <QtCore/QAbstractItemModel>
 
-namespace libspokify {
-class Track;
-}
+#include "libspokify/Track.h"
 
 class TrackModel
     : public QAbstractItemModel
@@ -37,6 +35,8 @@ public:
         Duration,
         Popularity
     };
+
+    typedef libspokify::Track TrackType;
 
     enum OwnRoles {
         TrackRole = Qt::UserRole,
@@ -64,11 +64,11 @@ private:
         QString   m_album;
         int       m_duration;
         int       m_popularity;
-        const libspokify::Track *m_track;
+        TrackType m_track;
     };
     QList<Entry> m_tracks;
 };
 
-Q_DECLARE_METATYPE(const libspokify::Track*)
+Q_DECLARE_METATYPE(TrackModel::TrackType)
 
 #endif

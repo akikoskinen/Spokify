@@ -11,7 +11,7 @@ Playlist::Playlist(QObject *parent) :
 Playlist::~Playlist() {
 }
 
-QList<const Track*> Playlist::tracks() const {
+QList<Track> Playlist::tracks() const {
     return m_tracks;
 }
 

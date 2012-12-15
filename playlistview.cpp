@@ -89,7 +89,7 @@ void PlaylistView::dropEvent(QDropEvent *event)
         return;
     }
     const MimeData *mimeData = static_cast<const MimeData*>(event->mimeData());
-    sp_track* const trackToAdd[] = { mimeData->track()->native() };
+    sp_track* const trackToAdd[] = { mimeData->track().native() };
     sp_playlist *targetPlaylist = target.data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
     sp_playlist_add_tracks(targetPlaylist, trackToAdd, 1, sp_playlist_num_tracks(targetPlaylist), Session().session());
 }

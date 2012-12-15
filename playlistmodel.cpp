@@ -115,12 +115,12 @@ bool PlaylistModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     Q_UNUSED(column);
     Q_UNUSED(parent);
 
-    const libspokify::Track *tr = static_cast<const MimeData*>(data)->track();
-    if (!tr || !sp_track_is_loaded(tr->native())) {
+    const libspokify::Track tr(static_cast<const MimeData*>(data)->track());
+    if (!tr.isValid() || !sp_track_is_loaded(tr.native())) {
         return false;
     }
 
-    kDebug() << "dropping track name" << QString::fromUtf8(sp_track_name(tr->native()));
+    kDebug() << "dropping track name" << QString::fromUtf8(sp_track_name(tr.native()));
 
     return true;
 }

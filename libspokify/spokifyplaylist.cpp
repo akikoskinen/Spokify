@@ -1,5 +1,6 @@
 #include "spokifyplaylist.h"
-#include "spokifytrack.h"
+
+#include "spokifyconstructor.h"
 
 #include <libspotify/api.h>
 
@@ -12,7 +13,7 @@ SpokifyPlaylist::SpokifyPlaylist(sp_playlist *native, QObject *parent) :
 
     const int numTracks = sp_playlist_num_tracks(m_nativePlaylist);
     for (int i = 0; i < numTracks; ++i) {
-        m_tracks.append(new SpokifyTrack(sp_playlist_track(m_nativePlaylist, i)));
+        m_tracks.append(SpokifyConstructor::newTrack(sp_playlist_track(m_nativePlaylist, i)));
     }
 }
 

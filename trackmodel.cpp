@@ -122,7 +122,7 @@ bool TrackModel::setData(const QModelIndex &index, const QVariant &value, int ro
             }
             break;
         case TrackRole:
-            m_tracks[index.row()].m_track = value.value<const libspokify::Track*>();
+            m_tracks[index.row()].m_track = value.value<TrackModel::TrackType>();
             break;
         default:
             return false;
@@ -160,7 +160,7 @@ QVariant TrackModel::data(const QModelIndex &index, int role) const
                     break;
             }
         case TrackRole:
-            return QVariant::fromValue<const libspokify::Track*>(m_tracks[index.row()].m_track);
+            return QVariant::fromValue<TrackModel::TrackType>(m_tracks[index.row()].m_track);
         case SortRole:
             switch (index.column()) {
                 case Title:

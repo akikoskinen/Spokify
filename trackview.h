@@ -33,7 +33,7 @@ public:
     virtual ~TrackView();
 
     void setSearching(bool searching);
-    void highlightTrack(const libspokify::Track *track);
+    void highlightTrack(const libspokify::Track &track);
 
 protected:
     virtual void paintEvent(QPaintEvent *event);

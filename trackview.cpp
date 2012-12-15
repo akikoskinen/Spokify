@@ -53,11 +53,11 @@ void TrackView::setSearching(bool searching)
     update();
 }
 
-void TrackView::highlightTrack(const libspokify::Track *track)
+void TrackView::highlightTrack(const libspokify::Track &track)
 {
     for (int i = 0; i < model()->rowCount(); ++i) {
         const QModelIndex currIndex = model()->index(i, 0);
-        const libspokify::Track *currTrack = currIndex.data(TrackModel::TrackRole).value<const libspokify::Track*>();
+        libspokify::Track currTrack(currIndex.data(TrackModel::TrackRole).value<TrackModel::TrackType>());
         if (currTrack == track) {
             setCurrentIndex(currIndex);
             return;
@@ -144,7 +144,7 @@ void TrackView::startDrag(Qt::DropActions supportedActions)
     Q_UNUSED(supportedActions);
 
     MimeData *mimeData = new MimeData;
-    mimeData->setTrack(currentIndex().data(TrackModel::TrackRole).value<const Track*>());
+    mimeData->setTrack(currentIndex().data(TrackModel::TrackRole).value<TrackModel::TrackType>());
 
     QDrag *drag = new QDrag(this);
     drag->setMimeData(mimeData);

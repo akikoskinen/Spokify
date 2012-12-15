@@ -21,9 +21,7 @@
 
 #include <QtCore/QMimeData>
 
-namespace libspokify {
-class Track;
-}
+#include "libspokify/Track.h"
 
 class MimeData
     : public QMimeData
@@ -32,11 +30,11 @@ public:
     MimeData();
     virtual ~MimeData();
 
-    void setTrack(const libspokify::Track *track);
-    const libspokify::Track *track() const;
+    void setTrack(const libspokify::Track &track);
+    libspokify::Track track() const;
 
 private:
-    const libspokify::Track *m_track;
+    libspokify::Track m_track;
 };
 
 #endif

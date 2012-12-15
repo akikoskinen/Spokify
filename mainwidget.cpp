@@ -379,7 +379,7 @@ void MainWidget::trackRequested(const QModelIndex &index)
     m_state = Playing;
     m_playPauseButton->setIsPlaying(true);
     m_currentPlayingCollection = m_currentCollection;
-    m_currentPlayingCollection->currentTrack = index.data(TrackModel::TrackRole).value<const libspokify::Track*>();
+    m_currentPlayingCollection->currentTrack = index.data(TrackModel::TrackRole).value<TrackModel::TrackType>();
     emit play(index);
 }
 
@@ -395,7 +395,7 @@ void MainWidget::layoutChangedSlot()
 
 void MainWidget::sliderSeekSlot(float position)
 {
-    emit seekPosition(position * sp_track_duration(m_currentPlayingCollection->currentTrack->native()));
+    emit seekPosition(position * sp_track_duration(m_currentPlayingCollection->currentTrack.native()));
 }
 
 void MainWidget::togglePlayPauseSlot()

@@ -74,10 +74,10 @@ public:
         {
         }
 
-        int rowForTrack(const libspokify::Track *track)
+        int rowForTrack(const libspokify::Track &track)
         {
             for (int i = 0; i < proxyModel->rowCount(); ++i) {
-                const libspokify::Track *currTrack = proxyModel->index(i, 0).data(TrackModel::TrackRole).value<const libspokify::Track*>();
+                libspokify::Track currTrack(proxyModel->index(i, 0).data(TrackModel::TrackRole).value<TrackModel::TrackType>());
                 if (currTrack == track) {
                     return i;
                 }
@@ -87,7 +87,7 @@ public:
 
         QSortFilterProxyModel *proxyModel;
         TrackModel            *trackModel;
-        const libspokify::Track  *currentTrack;
+        libspokify::Track      currentTrack;
         bool                   needsToBeFilled;
     };
 

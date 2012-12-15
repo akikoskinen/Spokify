@@ -20,7 +20,6 @@
 
 MimeData::MimeData()
     : QMimeData()
-    , m_track(0)
 {
 }
 
@@ -28,12 +27,12 @@ MimeData::~MimeData()
 {
 }
 
-void MimeData::setTrack(const libspokify::Track *track)
+void MimeData::setTrack(const libspokify::Track &track)
 {
     m_track = track;
 }
 
-const libspokify::Track *MimeData::track() const
+libspokify::Track MimeData::track() const
 {
     return m_track;
 }

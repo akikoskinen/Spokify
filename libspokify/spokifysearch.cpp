@@ -1,7 +1,7 @@
 #include "spokifysearch.h"
 
-#include "spokifytrack.h"
 #include "SearchResults.h"
+#include "spokifyconstructor.h"
 
 #include <libspotify/api.h>
 
@@ -45,11 +45,11 @@ sp_session* SpokifySearch::session() const {
 }
 
 void SpokifySearch::nativeSearchComplete(sp_search *result) {
-    QList<Track*> tracks;
+    QList<Track> tracks;
 
     for (int i = 0; i < sp_search_num_tracks(result); ++i) {
-        sp_track *const tr = sp_search_track(result, i);
-        tracks.append(new SpokifyTrack(tr));
+        sp_track *tr = sp_search_track(result, i);
+        tracks.append(SpokifyConstructor::newTrack(tr));
     }
 
     SearchResults *results = new SearchResults(query(), tracks);

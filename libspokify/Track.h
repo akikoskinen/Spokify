@@ -3,18 +3,35 @@
 
 struct sp_track;
 
+#include <QSharedPointer>
+
 namespace libspokify {
+
+class TrackPrivate;
 
 class Track {
 public:
-    virtual ~Track();
+    Track();
+
+    Track(const Track &track);
+
+    ~Track();
+
+    Track& operator=(const Track &other);
+
+    bool operator==(const Track &other) const;
+
+    bool isValid() const;
 
     sp_track* native() const;
 
-protected:
-    Track();
+private:
+    Track(TrackPrivate &p);
 
-    sp_track *m_native;
+    QSharedPointer<TrackPrivate> d_ptr;
+    Q_DECLARE_PRIVATE(Track)
+
+    friend class SpokifyConstructor;
 };
 
 }

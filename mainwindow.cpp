@@ -722,7 +722,7 @@ void MainWindow::playSlot(const QModelIndex &index)
     }
     m_previousTrack->setEnabled(true);
     m_nextTrack->setEnabled(true);
-    play(index.data(TrackModel::TrackRole).value<const libspokify::Track*>()->native());
+    play(index.data(TrackModel::TrackRole).value<TrackModel::TrackType>().native());
 }
 
 void MainWindow::resumeSlot()
@@ -791,8 +791,8 @@ void MainWindow::searchResults(libspokify::SearchResults *results)
     TrackModel *const trackModel = MainWindow::self()->mainWidget()->collection(results).trackModel;
     trackModel->insertRows(0, results->tracks().count());
     int i = 0;
-    foreach (const Track *track, results->tracks()) {
-        sp_track *const tr = track->native();
+    foreach (const Track track, results->tracks()) {
+        sp_track *const tr = track.native();
         if (!tr || !sp_track_is_loaded(tr)) {
             const QModelIndex &index = trackModel->index(i, TrackModel::Title);
             trackModel->setData(index, i18n("Loading..."));
@@ -826,7 +826,7 @@ void MainWindow::searchResults(libspokify::SearchResults *results)
         }
         {
             const QModelIndex &index = trackModel->index(i, TrackModel::TrackRole);
-            trackModel->setData(index, QVariant::fromValue<const Track*>(track), TrackModel::TrackRole);
+            trackModel->setData(index, QVariant::fromValue<TrackModel::TrackType>(track), TrackModel::TrackRole);
         }
 
         ++i;
@@ -860,12 +860,12 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
         c.needsToBeFilled = false;
         TrackModel *const trackModel = c.trackModel;
         trackModel->removeRows(0, trackModel->rowCount());
-        QList<const Track*> tracks = curr->tracks();
+        QList<Track> tracks = curr->tracks();
         const int numTracks = tracks.size();
         trackModel->insertRows(0, numTracks);
         for (int i = 0; i < numTracks; ++i) {
-            const Track *track = tracks.at(i);
-            sp_track *const tr = track->native();
+            Track track(tracks.at(i));
+            sp_track *const tr = track.native();
             
             if (!tr || !sp_track_is_loaded(tr)) {
                 const QModelIndex &index = trackModel->index(i, TrackModel::Title);
@@ -900,7 +900,7 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
             }
             {
                 const QModelIndex &index = trackModel->index(i, TrackModel::TrackRole);
-                trackModel->setData(index, QVariant::fromValue<const Track*>(track), TrackModel::TrackRole);
+                trackModel->setData(index, QVariant::fromValue<TrackModel::TrackType>(track), TrackModel::TrackRole);
             }
         }
         
@@ -909,9 +909,9 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
             const QModelIndex &index = trackModel->index(i, TrackModel::TrackRole);
 
 #if SPOTIFY_API_VERSION < 10
-            if (!sp_track_is_available(m_session->session(), trackModel->data(index).value<const Track*>()->native())) {
+            if (!sp_track_is_available(m_session->session(), trackModel->data(index).value<TrackModel::TrackType>().native())) {
 #else
-            if (sp_track_get_availability(m_session->session(), trackModel->data(index).value<const Track*>()->native()) != SP_TRACK_AVAILABILITY_AVAILABLE) {
+            if (sp_track_get_availability(m_session->session(), trackModel->data(index).value<TrackModel::TrackType>().native()) != SP_TRACK_AVAILABILITY_AVAILABLE) {
 #endif
                 trackModel->removeRow(i);
             }
@@ -962,11 +962,11 @@ void MainWindow::playPlaylist(const QModelIndex &index)
     m_nextTrack->setEnabled(true);
     MainWidget::Collection &c = m_mainWidget->collection(playlist);
     const QModelIndex currentIndex = c.proxyModel->index(0, 0);
-    c.currentTrack = currentIndex.data(TrackModel::TrackRole).value<const libspokify::Track*>();
+    c.currentTrack = currentIndex.data(TrackModel::TrackRole).value<TrackModel::TrackType>();
     m_mainWidget->setCurrentPlayingCollection(c);
     m_mainWidget->trackView()->highlightTrack(c.currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c.currentTrack->native());
+    play(c.currentTrack.native());
 }
 
 void MainWindow::playSearchHistory(const QModelIndex &index)
@@ -979,11 +979,11 @@ void MainWindow::playSearchHistory(const QModelIndex &index)
     m_nextTrack->setEnabled(true);
     MainWidget::Collection &c = m_mainWidget->collection(search);
     const QModelIndex currentIndex = c.proxyModel->index(0, 0);
-    c.currentTrack = currentIndex.data(TrackModel::TrackRole).value<const libspokify::Track*>();
+    c.currentTrack = currentIndex.data(TrackModel::TrackRole).value<TrackModel::TrackType>();
     m_mainWidget->setCurrentPlayingCollection(c);
     m_mainWidget->trackView()->highlightTrack(c.currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c.currentTrack->native());
+    play(c.currentTrack.native());
 }
 
 void MainWindow::coverClickedSlot()
@@ -1043,14 +1043,14 @@ void MainWindow::previousTrackSlot()
         if (!index.isValid()) {
             return;
         }
-        c->currentTrack = index.data(TrackModel::TrackRole).value<const libspokify::Track*>();
+        c->currentTrack = index.data(TrackModel::TrackRole).value<TrackModel::TrackType>();
     } else {
         const QModelIndex index = proxyModel->index(0, 0);
-        c->currentTrack = index.data(TrackModel::TrackRole).value<const libspokify::Track*>();
+        c->currentTrack = index.data(TrackModel::TrackRole).value<TrackModel::TrackType>();
     }
     m_mainWidget->trackView()->highlightTrack(c->currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c->currentTrack->native());
+    play(c->currentTrack.native());
 }
 
 void MainWindow::setupScrobblingSlot()
@@ -1124,10 +1124,10 @@ void MainWindow::nextTrackSlot()
         nextIndex = proxyModel->index(nNewTrackNum % proxyModel->rowCount(), 0);
     }
 
-    c->currentTrack = nextIndex.data(TrackModel::TrackRole).value<const libspokify::Track*>();
+    c->currentTrack = nextIndex.data(TrackModel::TrackRole).value<TrackModel::TrackType>();
     m_mainWidget->trackView()->highlightTrack(c->currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c->currentTrack->native());
+    play(c->currentTrack.native());
 }
 
 void MainWindow::initSound()
