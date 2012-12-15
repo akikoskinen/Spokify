@@ -1,5 +1,6 @@
 #include "Session.h"
 #include "sessionmaster.h"
+#include "spokifysearch.h"
 
 #include "libspotify/api.h"
 
@@ -129,6 +130,10 @@ PlaylistContainer* Session::playlistContainer() const {
 
 Player& Session::player() {
     return SessionMaster::get(session()).player();
+}
+
+Search* Session::newSearch(SearchQuery query) const {
+    return new SpokifySearch(session(), query);
 }
 
 sp_session* Session::session() const {

@@ -62,8 +62,8 @@ bool SearchHistoryModel::setData(const QModelIndex &index, const QVariant &value
         case Qt::DisplayRole:
             m_searchHistory[index.row()].m_title = value.toString();
             break;
-        case SpotifyNativeSearchRole:
-            m_searchHistory[index.row()].m_search = value.value<sp_search*>();
+        case SpotifySearchResultsRole:
+            m_searchHistory[index.row()].m_search = value.value<libspokify::SearchResults*>();
             break;
         default:
             return false;
@@ -80,8 +80,8 @@ QVariant SearchHistoryModel::data(const QModelIndex &index, int role) const
     switch (role) {
         case Qt::DisplayRole:
             return m_searchHistory[index.row()].m_title;
-        case SpotifyNativeSearchRole:
-            return QVariant::fromValue<sp_search*>(m_searchHistory[index.row()].m_search);
+        case SpotifySearchResultsRole:
+            return QVariant::fromValue<libspokify::SearchResults*>(m_searchHistory[index.row()].m_search);
         default:
             break;
     }

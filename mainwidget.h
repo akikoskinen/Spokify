@@ -45,6 +45,10 @@ class Slider;
 class PlayPauseButton;
 class BlockAnalyzer;
 
+namespace libspokify {
+class SearchResults;
+}
+
 class MainWidget
     : public QWidget
 {
@@ -96,7 +100,7 @@ public:
     void clearFilter();
 
     Collection &collection(sp_playlist *playlist);
-    Collection &collection(sp_search *search);
+    Collection &collection(libspokify::SearchResults *search);
     Collection *currentPlayingCollection() const;
     void setCurrentPlayingCollection(Collection &collection);
     TrackView *trackView() const;
@@ -140,7 +144,7 @@ private:
     int                              m_totalTrackTime;
 
     QHash<sp_playlist*, Collection> m_trackModelPlaylistCache;
-    QHash<sp_search*, Collection>   m_trackModelSearchCache;
+    QHash<libspokify::SearchResults*, Collection>   m_trackModelSearchCache;
     Collection                     *m_currentCollection;
     Collection                     *m_currentPlayingCollection;
 };

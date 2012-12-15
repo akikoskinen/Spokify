@@ -40,6 +40,8 @@
 #include <KPushButton>
 #include <kdeversion.h>
 
+using namespace libspokify;
+
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent)
     , m_state(Stopped)
@@ -183,7 +185,7 @@ MainWidget::Collection &MainWidget::collection(sp_playlist *playlist)
     return m_trackModelPlaylistCache[playlist];
 }
 
-MainWidget::Collection &MainWidget::collection(sp_search *search)
+MainWidget::Collection &MainWidget::collection(SearchResults *search)
 {
     if (m_trackModelSearchCache.contains(search)) {
         Collection &res = m_trackModelSearchCache[search];

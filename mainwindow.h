@@ -60,6 +60,10 @@ class SearchHistoryModel;
 class Scrobbler;
 class LyricsWidget;
 
+namespace libspokify {
+class SearchResults;
+}
+
 class MainWindow
     : public KXmlGuiWindow, public libspokify::AudioConsumer
 {
@@ -151,6 +155,7 @@ private Q_SLOTS:
     void clearAllWidgets();
     void previousTrackSlot();
     void setupScrobblingSlot();
+    void searchResults(libspokify::SearchResults *results);
 
 private:
     void play(sp_track *track);

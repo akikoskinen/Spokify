@@ -35,6 +35,9 @@
 #include "libspokify/Player.h"
 #include "libspokify/PlaylistContainer.h"
 #include "libspokify/Playlist.h"
+#include "libspokify/Search.h"
+#include "libspokify/SearchResults.h"
+#include "libspokify/Track.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QTimer>
@@ -199,81 +202,6 @@ namespace SpotifyPlaylists {
 
 }
 //END: SpotifyPlaylists - application bridge
-
-//BEGIN: SpotifySearch - application bridge
-namespace SpotifySearch {
-
-    static void searchComplete(sp_search *result, void *userdata)
-    {
-        QString *query = static_cast<QString*>(userdata);
-
-        SearchHistoryModel *const searchHistoryModel = MainWindow::self()->searchHistoryModel();
-        searchHistoryModel->insertRow(searchHistoryModel->rowCount());
-        const QModelIndex index = searchHistoryModel->index(searchHistoryModel->rowCount() - 1, 0);
-        searchHistoryModel->setData(index, *query);
-        searchHistoryModel->setData(index, QVariant::fromValue<sp_search*>(result), SearchHistoryModel::SpotifyNativeSearchRole);
-        MainWindow::self()->searchHistoryView()->setCurrentIndex(index);
-
-        MainWindow::self()->mainWidget()->trackView()->setSearching(false);
-        TrackModel *const trackModel = MainWindow::self()->mainWidget()->collection(result).trackModel;
-        trackModel->insertRows(0, sp_search_num_tracks(result));
-        for (int i = 0; i < sp_search_num_tracks(result); ++i) {
-            sp_track *const tr = sp_search_track(result, i);
-            if (!tr || !sp_track_is_loaded(tr)) {
-                const QModelIndex &index = trackModel->index(i, TrackModel::Title);
-                trackModel->setData(index, i18n("Loading..."));
-                continue;
-            }
-            {
-                const QModelIndex &index = trackModel->index(i, TrackModel::Title);
-                trackModel->setData(index, QString::fromUtf8(sp_track_name(tr)));
-            }
-            {
-                const QModelIndex &index = trackModel->index(i, TrackModel::Artist);
-                sp_artist *const artist = sp_track_artist(tr, 0);
-                if (artist) {
-                    trackModel->setData(index, QString::fromUtf8(sp_artist_name(artist)));
-                }
-            }
-            {
-                const QModelIndex &index = trackModel->index(i, TrackModel::Album);
-                sp_album *const album = sp_track_album(tr);
-                if (album) {
-                    trackModel->setData(index, QString::fromUtf8(sp_album_name(album)));
-                }
-            }
-            {
-                const QModelIndex &index = trackModel->index(i, TrackModel::Duration);
-                trackModel->setData(index, sp_track_duration(tr));
-            }
-            {
-                const QModelIndex &index = trackModel->index(i, TrackModel::Popularity);
-                trackModel->setData(index, sp_track_popularity(tr));
-            }
-            {
-                const QModelIndex &index = trackModel->index(i, TrackModel::Title);
-                trackModel->setData(index, QVariant::fromValue<sp_track*>(tr), TrackModel::SpotifyNativeTrackRole);
-            }
-        }
-        MainWindow::self()->showTemporaryMessage(i18n("Search complete"));
-
-        delete query;
-    }
-
-    static void dummySearchComplete(sp_search *result, void *userdata)
-    {
-        QString *query = static_cast<QString*>(userdata);
-
-        const int res = sp_search_total_tracks(result);
-#if SPOTIFY_API_VERSION >= 12
-        sp_search_create(Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::searchComplete, userdata);
-#else
-        sp_search_create(Session().session(), query->toUtf8().data(), 0, res, 0, 0, 0, 0, &SpotifySearch::searchComplete, userdata);
-#endif
-    }
-
-}
-//END: SpotifySearch - application bridge
 
 //BEGIN: SpotifyImage - application bridge
 namespace SpotifyImage {
@@ -845,11 +773,65 @@ void MainWindow::performSearch()
             return;
     }
 
-#if SPOTIFY_API_VERSION >= 12
-    sp_search_create(m_session->session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, 0, 0, SP_SEARCH_STANDARD, &SpotifySearch::dummySearchComplete, new QString(query));
-#else
-    sp_search_create(m_session->session(), query.toUtf8().data(), 0, 1, 0, 0, 0, 0, &SpotifySearch::dummySearchComplete, new QString(query));
-#endif
+    Search* search = m_session->newSearch(query);
+    connect(search, SIGNAL(searchComplete(libspokify::SearchResults*)), this, SLOT(searchResults(libspokify::SearchResults*)));
+    search->execute();
+}
+
+void MainWindow::searchResults(libspokify::SearchResults *results)
+{
+    SearchHistoryModel *const searchHistoryModel = MainWindow::self()->searchHistoryModel();
+    searchHistoryModel->insertRow(searchHistoryModel->rowCount());
+    const QModelIndex index = searchHistoryModel->index(searchHistoryModel->rowCount() - 1, 0);
+    searchHistoryModel->setData(index, results->query());
+    searchHistoryModel->setData(index, QVariant::fromValue<SearchResults*>(results), SearchHistoryModel::SpotifySearchResultsRole);
+    MainWindow::self()->searchHistoryView()->setCurrentIndex(index);
+
+    MainWindow::self()->mainWidget()->trackView()->setSearching(false);
+    TrackModel *const trackModel = MainWindow::self()->mainWidget()->collection(results).trackModel;
+    trackModel->insertRows(0, results->tracks().count());
+    int i = 0;
+    foreach (const Track *track, results->tracks()) {
+        sp_track *const tr = track->native();
+        if (!tr || !sp_track_is_loaded(tr)) {
+            const QModelIndex &index = trackModel->index(i, TrackModel::Title);
+            trackModel->setData(index, i18n("Loading..."));
+            continue;
+        }
+        {
+            const QModelIndex &index = trackModel->index(i, TrackModel::Title);
+            trackModel->setData(index, QString::fromUtf8(sp_track_name(tr)));
+        }
+        {
+            const QModelIndex &index = trackModel->index(i, TrackModel::Artist);
+            sp_artist *const artist = sp_track_artist(tr, 0);
+            if (artist) {
+                trackModel->setData(index, QString::fromUtf8(sp_artist_name(artist)));
+            }
+        }
+        {
+            const QModelIndex &index = trackModel->index(i, TrackModel::Album);
+            sp_album *const album = sp_track_album(tr);
+            if (album) {
+                trackModel->setData(index, QString::fromUtf8(sp_album_name(album)));
+            }
+        }
+        {
+            const QModelIndex &index = trackModel->index(i, TrackModel::Duration);
+            trackModel->setData(index, sp_track_duration(tr));
+        }
+        {
+            const QModelIndex &index = trackModel->index(i, TrackModel::Popularity);
+            trackModel->setData(index, sp_track_popularity(tr));
+        }
+        {
+            const QModelIndex &index = trackModel->index(i, TrackModel::Title);
+            trackModel->setData(index, QVariant::fromValue<sp_track*>(tr), TrackModel::SpotifyNativeTrackRole);
+        }
+
+        ++i;
+    }
+    MainWindow::self()->showTemporaryMessage(i18n("Search complete"));
 }
 
 void MainWindow::pcmWrittenSlot(const Chunk &chunk)
@@ -949,7 +931,7 @@ void MainWindow::searchHistoryChanged(const QItemSelection &selection)
 
     m_playlistView->setCurrentIndex(QModelIndex());
 
-    sp_search *const curr = index.data(SearchHistoryModel::SpotifyNativeSearchRole).value<sp_search*>();
+    SearchResults *const curr = index.data(SearchHistoryModel::SpotifySearchResultsRole).value<SearchResults*>();
     m_mainWidget->collection(curr);
     m_currentPlaylist = 0;
 }
@@ -987,8 +969,8 @@ void MainWindow::playPlaylist(const QModelIndex &index)
 
 void MainWindow::playSearchHistory(const QModelIndex &index)
 {
-    sp_search *search = index.data(SearchHistoryModel::SpotifyNativeSearchRole).value<sp_search*>();
-    if (!sp_search_num_tracks(search)) {
+    SearchResults *search = index.data(SearchHistoryModel::SpotifySearchResultsRole).value<SearchResults*>();
+    if (search->tracks().empty()) {
         return;
     }
     m_previousTrack->setEnabled(true);
@@ -1018,7 +1000,7 @@ void MainWindow::coverClickedSlot()
         }
         for (int i = 0; i < m_searchHistoryModel->rowCount(); ++i) {
             const QModelIndex index = m_searchHistoryModel->index(i, 0);
-            sp_search *const search = m_searchHistoryModel->data(index, SearchHistoryModel::SpotifyNativeSearchRole).value<sp_search*>();
+            SearchResults *const search = m_searchHistoryModel->data(index, SearchHistoryModel::SpotifySearchResultsRole).value<SearchResults*>();
             if (c == &m_mainWidget->collection(search)) {
                 m_searchHistoryView->setCurrentIndex(index);
                 m_playlistView->setCurrentIndex(QModelIndex());

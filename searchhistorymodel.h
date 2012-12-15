@@ -22,14 +22,16 @@
 #include <QtCore/QList>
 #include <QtCore/QAbstractListModel>
 
-struct sp_search;
+namespace libspokify {
+class SearchResults;
+}
 
 class SearchHistoryModel
     : public QAbstractListModel
 {
 public:
     enum OwnRoles {
-        SpotifyNativeSearchRole = Qt::UserRole
+        SpotifySearchResultsRole = Qt::UserRole
     };
 
     SearchHistoryModel(QObject *parent = 0);
@@ -44,11 +46,11 @@ public:
 private:
     struct Entry {
         QString    m_title;
-        sp_search *m_search;
+        libspokify::SearchResults *m_search;
     };
     QList<Entry> m_searchHistory;
 };
 
-Q_DECLARE_METATYPE(sp_search*)
+Q_DECLARE_METATYPE(libspokify::SearchResults*)
 
 #endif

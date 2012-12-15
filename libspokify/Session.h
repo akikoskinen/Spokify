@@ -7,6 +7,7 @@
 struct sp_session;
 
 #include "Error.h"
+#include "Search.h"
 
 namespace libspokify {
 
@@ -62,6 +63,12 @@ public:
     PlaylistContainer* playlistContainer() const;
 
     Player& player();
+
+    /**
+     * The caller gains the ownership of the returned object and is responsible
+     * for releasing it.
+     */
+    Search* newSearch(SearchQuery query) const;
 
     // TODO remove this eventually
     sp_session* session() const;
