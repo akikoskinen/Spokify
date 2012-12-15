@@ -19,9 +19,9 @@ public:
 
     virtual bool removePlaylist(int index);
 
-    void notifyPlaylistAdded(sp_playlist *playlist, int position);
-    void notifyPlaylistRemoved(sp_playlist *playlist, int position);
-    void notifyPlaylistMoved(sp_playlist *playlist, int fromPosition, int toPosition);
+    void notifyPlaylistAdded();
+    void notifyPlaylistRemoved();
+    void notifyPlaylistMoved();
     void notifyContainerLoaded();
 
     sp_playlistcontainer* native() const;

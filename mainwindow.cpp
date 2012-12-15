@@ -446,9 +446,9 @@ void MainWindow::spotifyLoggedIn(const Error &error)
 
         PlaylistContainer *sessionPlaylistContainer = m_session->playlistContainer();
         connect(sessionPlaylistContainer, SIGNAL(containerLoaded()), this, SLOT(fillPlaylistModel()));
-        connect(sessionPlaylistContainer, SIGNAL(playlistAdded(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
-        connect(sessionPlaylistContainer, SIGNAL(playlistMoved(sp_playlist*,int,int)), this, SLOT(fillPlaylistModel()));
-        connect(sessionPlaylistContainer, SIGNAL(playlistRemoved(sp_playlist*,int)), this, SLOT(fillPlaylistModel()));
+        connect(sessionPlaylistContainer, SIGNAL(playlistAdded()), this, SLOT(fillPlaylistModel()));
+        connect(sessionPlaylistContainer, SIGNAL(playlistMoved()), this, SLOT(fillPlaylistModel()));
+        connect(sessionPlaylistContainer, SIGNAL(playlistRemoved()), this, SLOT(fillPlaylistModel()));
 
         m_loggedIn = true;
         m_login->setVisible(false);

@@ -3,8 +3,6 @@
 
 #include <QObject>
 
-struct sp_playlist;
-
 namespace libspokify {
 
 class Playlist;
@@ -32,9 +30,9 @@ public:
     virtual QList<Playlist*> playlists() const;
 
 Q_SIGNALS:
-    void playlistAdded(sp_playlist *playlist, int position);
-    void playlistRemoved(sp_playlist *playlist, int position);
-    void playlistMoved(sp_playlist *playlist, int fromPosition, int toPosition);
+    void playlistAdded();
+    void playlistRemoved();
+    void playlistMoved();
     void containerLoaded();
 
 protected:

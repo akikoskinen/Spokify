@@ -8,26 +8,33 @@
 static QMap<sp_playlistcontainer*, libspokify::SpokifyPlaylistContainer*> SpokifyPlaylistContainers;
 
 void cbPlaylistAdded(sp_playlistcontainer *pc, sp_playlist *playlist, int position, void *userdata) {
+    Q_UNUSED(playlist);
+    Q_UNUSED(position);
     Q_UNUSED(userdata);
 
     if (SpokifyPlaylistContainers.contains(pc)) {
-        SpokifyPlaylistContainers[pc]->notifyPlaylistAdded(playlist, position);
+        SpokifyPlaylistContainers[pc]->notifyPlaylistAdded();
     }
 }
 
 void cbPlaylistRemoved(sp_playlistcontainer *pc, sp_playlist *playlist, int position, void *userdata) {
+    Q_UNUSED(playlist);
+    Q_UNUSED(position);
     Q_UNUSED(userdata);
 
     if (SpokifyPlaylistContainers.contains(pc)) {
-        SpokifyPlaylistContainers[pc]->notifyPlaylistRemoved(playlist, position);
+        SpokifyPlaylistContainers[pc]->notifyPlaylistRemoved();
     }
 }
 
 void cbPlaylistMoved(sp_playlistcontainer *pc, sp_playlist *playlist, int fromPosition, int toPosition, void *userdata) {
+    Q_UNUSED(playlist);
+    Q_UNUSED(fromPosition);
+    Q_UNUSED(toPosition);
     Q_UNUSED(userdata);
 
     if (SpokifyPlaylistContainers.contains(pc)) {
-        SpokifyPlaylistContainers[pc]->notifyPlaylistMoved(playlist, fromPosition, toPosition);
+        SpokifyPlaylistContainers[pc]->notifyPlaylistMoved();
     }
 }
 
@@ -71,22 +78,19 @@ bool SpokifyPlaylistContainer::removePlaylist(int index) {
     return result == SP_ERROR_OK;
 }
 
-void SpokifyPlaylistContainer::notifyPlaylistAdded(sp_playlist *playlist, int position) {
+void SpokifyPlaylistContainer::notifyPlaylistAdded() {
     updatePlaylists();
-
-    emit playlistAdded(playlist, position);
+    emit playlistAdded();
 }
 
-void SpokifyPlaylistContainer::notifyPlaylistRemoved(sp_playlist *playlist, int position) {
+void SpokifyPlaylistContainer::notifyPlaylistRemoved() {
     updatePlaylists();
-
-    emit playlistRemoved(playlist, position);
+    emit playlistRemoved();
 }
 
-void SpokifyPlaylistContainer::notifyPlaylistMoved(sp_playlist *playlist, int fromPosition, int toPosition) {
+void SpokifyPlaylistContainer::notifyPlaylistMoved() {
     updatePlaylists();
-
-    emit playlistMoved(playlist, fromPosition, toPosition);
+    emit playlistMoved();
 }
 
 void SpokifyPlaylistContainer::notifyContainerLoaded() {
