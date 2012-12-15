@@ -1,6 +1,8 @@
 #include "Track.h"
 #include "track_p.h"
 
+#include <libspotify/api.h>
+
 namespace libspokify {
 
 TrackPrivate::TrackPrivate(sp_track *native) :
@@ -17,6 +19,14 @@ bool TrackPrivate::operator==(const TrackPrivate &other) const {
 
 bool TrackPrivate::isValid() const {
     return m_native != NULL;
+}
+
+int TrackPrivate::duration() const {
+    int dur = 0;
+    if (isValid()) {
+        dur = sp_track_duration(m_native);
+    }
+    return dur;
 }
 
 
@@ -52,6 +62,11 @@ bool Track::operator==(const Track &other) const {
 bool Track::isValid() const {
     Q_D(const Track);
     return d->isValid();
+}
+
+int Track::duration() const {
+    Q_D(const Track);
+    return d->duration();
 }
 
 sp_track* Track::native() const {

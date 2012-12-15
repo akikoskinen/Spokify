@@ -23,6 +23,11 @@ public:
 
     bool isValid() const;
 
+    /**
+     * Returns the duration of the track in milliseconds.
+     */
+    int duration() const;
+
     sp_track* native() const;
 
 private:

@@ -15,6 +15,8 @@ public:
 
     bool isValid() const;
 
+    int duration() const;
+
     sp_track *m_native;
 };
 

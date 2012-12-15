@@ -64,6 +64,7 @@ class LyricsWidget;
 namespace libspokify {
 class Session;
 class Error;
+class Track;
 class SearchResults;
 }
 
@@ -161,7 +162,7 @@ private Q_SLOTS:
     void searchResults(libspokify::SearchResults *results);
 
 private:
-    void play(sp_track *track);
+    void play(const libspokify::Track &track);
     void initSound();
     void clearSoundQueue();
     QWidget *createSearchWidget();

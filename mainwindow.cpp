@@ -722,7 +722,7 @@ void MainWindow::playSlot(const QModelIndex &index)
     }
     m_previousTrack->setEnabled(true);
     m_nextTrack->setEnabled(true);
-    play(index.data(TrackModel::TrackRole).value<TrackModel::TrackType>().native());
+    play(index.data(TrackModel::TrackRole).value<TrackModel::TrackType>());
 }
 
 void MainWindow::resumeSlot()
@@ -818,7 +818,7 @@ void MainWindow::searchResults(libspokify::SearchResults *results)
         }
         {
             const QModelIndex &index = trackModel->index(i, TrackModel::Duration);
-            trackModel->setData(index, sp_track_duration(tr));
+            trackModel->setData(index, track.duration());
         }
         {
             const QModelIndex &index = trackModel->index(i, TrackModel::Popularity);
@@ -892,7 +892,7 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
             }
             {
                 const QModelIndex &index = trackModel->index(i, TrackModel::Duration);
-                trackModel->setData(index, sp_track_duration(tr));
+                trackModel->setData(index, track.duration());
             }
             {
                 const QModelIndex &index = trackModel->index(i, TrackModel::Popularity);
@@ -966,7 +966,7 @@ void MainWindow::playPlaylist(const QModelIndex &index)
     m_mainWidget->setCurrentPlayingCollection(c);
     m_mainWidget->trackView()->highlightTrack(c.currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c.currentTrack.native());
+    play(c.currentTrack);
 }
 
 void MainWindow::playSearchHistory(const QModelIndex &index)
@@ -983,7 +983,7 @@ void MainWindow::playSearchHistory(const QModelIndex &index)
     m_mainWidget->setCurrentPlayingCollection(c);
     m_mainWidget->trackView()->highlightTrack(c.currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c.currentTrack.native());
+    play(c.currentTrack);
 }
 
 void MainWindow::coverClickedSlot()
@@ -1050,7 +1050,7 @@ void MainWindow::previousTrackSlot()
     }
     m_mainWidget->trackView()->highlightTrack(c->currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c->currentTrack.native());
+    play(c->currentTrack);
 }
 
 void MainWindow::setupScrobblingSlot()
@@ -1059,7 +1059,7 @@ void MainWindow::setupScrobblingSlot()
     dialog->show();
 }
 
-void MainWindow::play(sp_track *tr)
+void MainWindow::play(const Track &track)
 {
     // Scrobble the currently playing song
     emit scrobble();
@@ -1075,23 +1075,22 @@ void MainWindow::play(sp_track *tr)
     m_cover->clear();
     m_cover->setMovie(m_coverLoading);
 
-    sp_album *const album = sp_track_album(tr);
+    sp_album *const album = sp_track_album(track.native());
 #if SPOTIFY_API_VERSION >= 12
     const byte *image = sp_album_cover(album, SP_IMAGE_SIZE_NORMAL);
 #else
     const byte *image = sp_album_cover(album);
 #endif
     sp_image *const cover = sp_image_create(m_session->session(), image);
-    sp_image_add_load_callback(cover, &SpotifyImage::imageLoaded, tr);
-    m_session->player().load(tr);
+    sp_image_add_load_callback(cover, &SpotifyImage::imageLoaded, track.native());
+    m_session->player().load(track.native());
     m_session->player().play();
-    m_mainWidget->setTotalTrackTime(sp_track_duration(tr));
+    m_mainWidget->setTotalTrackTime(track.duration());
 
     // Set the currently playing song
-    QString artist = QString::fromUtf8(sp_artist_name(sp_track_artist(tr, 0)));
-    QString track = QString::fromUtf8(sp_track_name(tr));
-    uint duration = sp_track_duration(tr);
-    emit nowPlaying(artist, track, duration);
+    QString artist = QString::fromUtf8(sp_artist_name(sp_track_artist(track.native(), 0)));
+    QString trackName = QString::fromUtf8(sp_track_name(track.native()));
+    emit nowPlaying(artist, trackName, track.duration());
 
     m_playCondition.wakeAll();
 }
@@ -1127,7 +1126,7 @@ void MainWindow::nextTrackSlot()
     c->currentTrack = nextIndex.data(TrackModel::TrackRole).value<TrackModel::TrackType>();
     m_mainWidget->trackView()->highlightTrack(c->currentTrack);
     m_mainWidget->setState(MainWidget::Playing);
-    play(c->currentTrack.native());
+    play(c->currentTrack);
 }
 
 void MainWindow::initSound()

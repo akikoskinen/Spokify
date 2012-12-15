@@ -395,7 +395,7 @@ void MainWidget::layoutChangedSlot()
 
 void MainWidget::sliderSeekSlot(float position)
 {
-    emit seekPosition(position * sp_track_duration(m_currentPlayingCollection->currentTrack.native()));
+    emit seekPosition(position * m_currentPlayingCollection->currentTrack.duration());
 }
 
 void MainWidget::togglePlayPauseSlot()
