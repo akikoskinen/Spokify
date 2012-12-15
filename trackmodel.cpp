@@ -121,8 +121,8 @@ bool TrackModel::setData(const QModelIndex &index, const QVariant &value, int ro
                     return false;
             }
             break;
-        case SpotifyNativeTrackRole:
-            m_tracks[index.row()].m_track = value.value<sp_track*>();
+        case TrackRole:
+            m_tracks[index.row()].m_track = value.value<const libspokify::Track*>();
             break;
         default:
             return false;
@@ -159,8 +159,8 @@ QVariant TrackModel::data(const QModelIndex &index, int role) const
                 default:
                     break;
             }
-        case SpotifyNativeTrackRole:
-            return QVariant::fromValue<sp_track*>(m_tracks[index.row()].m_track);
+        case TrackRole:
+            return QVariant::fromValue<const libspokify::Track*>(m_tracks[index.row()].m_track);
         case SortRole:
             switch (index.column()) {
                 case Title:

@@ -22,7 +22,9 @@
 #include <QtCore/QList>
 #include <QtCore/QAbstractItemModel>
 
-struct sp_track;
+namespace libspokify {
+class Track;
+}
 
 class TrackModel
     : public QAbstractItemModel
@@ -37,7 +39,7 @@ public:
     };
 
     enum OwnRoles {
-        SpotifyNativeTrackRole = Qt::UserRole,
+        TrackRole = Qt::UserRole,
         SortRole
     };
 
@@ -62,11 +64,11 @@ private:
         QString   m_album;
         int       m_duration;
         int       m_popularity;
-        sp_track *m_track;
+        const libspokify::Track *m_track;
     };
     QList<Entry> m_tracks;
 };
 
-Q_DECLARE_METATYPE(sp_track*)
+Q_DECLARE_METATYPE(const libspokify::Track*)
 
 #endif

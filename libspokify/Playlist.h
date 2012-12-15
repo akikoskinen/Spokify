@@ -7,6 +7,8 @@ struct sp_playlist;
 
 namespace libspokify {
 
+class Track;
+
 class Playlist : public QObject {
     Q_OBJECT
 
@@ -19,10 +21,14 @@ public:
 
     virtual void rename(QString newName) = 0;
 
+    QList<const Track*> tracks() const;
+
     // TODO remove this from the public interface when it's not needed anymore
     sp_playlist* native() const;
 
 protected:
+    QList<const Track*> m_tracks;
+
     sp_playlist *m_nativePlaylist;
 
 };

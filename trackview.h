@@ -21,7 +21,9 @@
 
 #include <QtGui/QTableView>
 
-struct sp_track;
+namespace libspokify {
+class Track;
+}
 
 class TrackView
     : public QTableView
@@ -31,7 +33,7 @@ public:
     virtual ~TrackView();
 
     void setSearching(bool searching);
-    void highlightTrack(sp_track *track);
+    void highlightTrack(const libspokify::Track *track);
 
 protected:
     virtual void paintEvent(QPaintEvent *event);

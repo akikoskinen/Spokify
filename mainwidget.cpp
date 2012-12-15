@@ -24,6 +24,8 @@
 #include "trackviewdelegate.h"
 #include "blockanalyzer.h"
 
+#include "libspokify/Track.h"
+
 #include <math.h>
 
 #include <QtGui/QLabel>
@@ -377,7 +379,7 @@ void MainWidget::trackRequested(const QModelIndex &index)
     m_state = Playing;
     m_playPauseButton->setIsPlaying(true);
     m_currentPlayingCollection = m_currentCollection;
-    m_currentPlayingCollection->currentTrack = index.data(TrackModel::SpotifyNativeTrackRole).value<sp_track*>();
+    m_currentPlayingCollection->currentTrack = index.data(TrackModel::TrackRole).value<const libspokify::Track*>();
     emit play(index);
 }
 
@@ -393,7 +395,7 @@ void MainWidget::layoutChangedSlot()
 
 void MainWidget::sliderSeekSlot(float position)
 {
-    emit seekPosition(position * sp_track_duration(m_currentPlayingCollection->currentTrack));
+    emit seekPosition(position * sp_track_duration(m_currentPlayingCollection->currentTrack->native()));
 }
 
 void MainWidget::togglePlayPauseSlot()

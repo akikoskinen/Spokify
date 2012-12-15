@@ -28,12 +28,12 @@ MimeData::~MimeData()
 {
 }
 
-void MimeData::setTrack(sp_track *track)
+void MimeData::setTrack(const libspokify::Track *track)
 {
     m_track = track;
 }
 
-sp_track *MimeData::track() const
+const libspokify::Track *MimeData::track() const
 {
     return m_track;
 }

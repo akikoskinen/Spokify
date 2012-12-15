@@ -29,7 +29,7 @@
 #include <KApplication>
 #include <KStandardDirs>
 
-struct sp_track;
+using namespace libspokify;
 
 TrackView::TrackView(QWidget *parent)
     : QTableView(parent)
@@ -53,11 +53,11 @@ void TrackView::setSearching(bool searching)
     update();
 }
 
-void TrackView::highlightTrack(sp_track *track)
+void TrackView::highlightTrack(const libspokify::Track *track)
 {
     for (int i = 0; i < model()->rowCount(); ++i) {
         const QModelIndex currIndex = model()->index(i, 0);
-        sp_track *const currTrack = currIndex.data(TrackModel::SpotifyNativeTrackRole).value<sp_track*>();
+        const libspokify::Track *currTrack = currIndex.data(TrackModel::TrackRole).value<const libspokify::Track*>();
         if (currTrack == track) {
             setCurrentIndex(currIndex);
             return;
@@ -144,7 +144,7 @@ void TrackView::startDrag(Qt::DropActions supportedActions)
     Q_UNUSED(supportedActions);
 
     MimeData *mimeData = new MimeData;
-    mimeData->setTrack(currentIndex().data(TrackModel::SpotifyNativeTrackRole).value<sp_track*>());
+    mimeData->setTrack(currentIndex().data(TrackModel::TrackRole).value<const Track*>());
 
     QDrag *drag = new QDrag(this);
     drag->setMimeData(mimeData);

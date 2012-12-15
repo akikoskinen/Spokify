@@ -23,7 +23,6 @@
 
 #include "chunk.h"
 
-#include "libspokify/Session.h"
 #include "libspokify/Player.h"
 
 #include <QtCore/QMutex>
@@ -37,7 +36,9 @@
 #include <alsa/asoundlib.h>
 
 #include "appkey.h"
-#include <libspotify/api.h>
+
+struct sp_playlist;
+struct sp_track;
 
 class QMovie;
 class QLabel;
@@ -61,6 +62,8 @@ class Scrobbler;
 class LyricsWidget;
 
 namespace libspokify {
+class Session;
+class Error;
 class SearchResults;
 }
 
