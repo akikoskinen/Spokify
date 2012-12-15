@@ -44,6 +44,7 @@ private:
     Q_DECLARE_PRIVATE(Track)
 
     friend class SpokifyConstructor;
+    friend class SpokifyPlayer;
 };
 
 }

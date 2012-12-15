@@ -39,10 +39,9 @@ public:
 
     virtual void seek(unsigned int position);
 
-    virtual void load(sp_track *track);
     virtual void unload();
 
-    virtual void play();
+    virtual void play(const Track &track);
     virtual void pause();
 
 private:

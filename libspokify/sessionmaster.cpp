@@ -3,6 +3,7 @@
 #include <QTimer>
 #include <libspotify/api.h>
 #include "spokifyplaylist.h"
+#include "track_p.h"
 
 namespace libspokify {
 
@@ -81,16 +82,16 @@ void SpokifyPlayer::seek(unsigned int position) {
     sp_session_player_seek(m_session, position);
 }
 
-void SpokifyPlayer::load(sp_track *track) {
-    sp_session_player_load(m_session, track);
-}
-
 void SpokifyPlayer::unload() {
     sp_session_player_unload(m_session);
 }
 
-void SpokifyPlayer::play() {
-    sp_session_player_play(m_session, true);
+void SpokifyPlayer::play(const Track &track) {
+    sp_track *t = track.d_ptr->m_native;
+    if (t != NULL) {
+        sp_session_player_load(m_session, t);
+        sp_session_player_play(m_session, true);
+    }
 }
 
 void SpokifyPlayer::pause() {

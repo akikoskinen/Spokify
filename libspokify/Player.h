@@ -3,8 +3,6 @@
 
 #include <QObject>
 
-struct sp_track;
-
 namespace libspokify {
 
 class AudioChunk {
@@ -25,6 +23,7 @@ public:
     virtual unsigned int consumeAudio(const AudioChunk &chunk) = 0;
 };
 
+class Track;
 
 class Player : public QObject {
     Q_OBJECT
@@ -43,10 +42,9 @@ public:
      */
     virtual void seek(unsigned int position) = 0;
 
-    virtual void load(sp_track *track) = 0;
     virtual void unload() = 0;
 
-    virtual void play() = 0;
+    virtual void play(const Track &track) = 0;
     virtual void pause() = 0;
 
 private:

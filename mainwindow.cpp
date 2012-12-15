@@ -1083,8 +1083,7 @@ void MainWindow::play(const Track &track)
 #endif
     sp_image *const cover = sp_image_create(m_session->session(), image);
     sp_image_add_load_callback(cover, &SpotifyImage::imageLoaded, track.native());
-    m_session->player().load(track.native());
-    m_session->player().play();
+    m_session->player().play(track);
     m_mainWidget->setTotalTrackTime(track.duration());
 
     // Set the currently playing song
