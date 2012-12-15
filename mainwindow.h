@@ -138,6 +138,7 @@ protected:
 private Q_SLOTS:
     void spotifyLoggedIn(const libspokify::Error &error);
     void spotifyLoggedOut();
+    void playlistNeedsReload();
     void newChunkReceivedSlot(const Chunk &chunk);
     void spotifyPlayTokenLost();
     void endOfTrack();

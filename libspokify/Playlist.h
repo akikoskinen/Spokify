@@ -27,6 +27,12 @@ public:
     // TODO remove this from the public interface when it's not needed anymore
     sp_playlist* native() const;
 
+Q_SIGNALS:
+    void tracksAdded();
+    void tracksRemoved();
+    void tracksMoved();
+    void playlistRenamed();
+
 private:
     explicit Playlist(PlaylistPrivate &p, QObject *parent = 0);
 

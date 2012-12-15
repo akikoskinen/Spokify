@@ -73,136 +73,6 @@ MainWindow *MainWindow::s_self = 0;
 
 using namespace libspokify;
 
-//BEGIN: SpotifyPlaylists - application bridge
-namespace SpotifyPlaylists {
-
-    static void tracksAdded(sp_playlist *pl, sp_track *const *tracks, int numTracks, int position, void *userdata)
-    {
-        Q_UNUSED(tracks);
-        Q_UNUSED(numTracks);
-        Q_UNUSED(position);
-        Q_UNUSED(userdata);
-        MainWidget::Collection &c = MainWindow::self()->mainWidget()->collection(pl);
-        c.needsToBeFilled = true;
-    }
-
-    static void tracksRemoved(sp_playlist *pl, const int *tracks, int numTracks, void *userdata)
-    {
-        Q_UNUSED(tracks);
-        Q_UNUSED(numTracks);
-        Q_UNUSED(userdata);
-        MainWidget::Collection &c = MainWindow::self()->mainWidget()->collection(pl);
-        c.needsToBeFilled = true;
-    }
-
-    static void tracksMoved(sp_playlist *pl, const int *tracks, int numTracks, int newPosition, void *userdata)
-    {
-        Q_UNUSED(tracks);
-        Q_UNUSED(numTracks);
-        Q_UNUSED(newPosition);
-        Q_UNUSED(userdata);
-        MainWidget::Collection &c = MainWindow::self()->mainWidget()->collection(pl);
-        c.needsToBeFilled = true;
-    }
-
-    static void playlistRenamed(sp_playlist *pl, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(userdata);
-        MainWindow::self()->fillPlaylistModel();
-    }
-
-    static void playlistStateChanged(sp_playlist *pl, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(userdata);
-    }
-
-    static void playlistUpdateInProgress(sp_playlist *pl, bool done, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(done);
-        Q_UNUSED(userdata);
-    }
-
-    static void playlistMetadataUpdated(sp_playlist *pl, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(userdata);
-    }
-
-#if SPOTIFY_API_VERSION > 4
-    static void trackCreatedChanged(sp_playlist *pl, int position, sp_user *user, int when, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(position);
-        Q_UNUSED(user);
-        Q_UNUSED(when);
-        Q_UNUSED(userdata);
-    }
-
-    static void trackSeenChanged(sp_playlist *pl, int position, bool seen, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(position);
-        Q_UNUSED(seen);
-        Q_UNUSED(userdata);
-    }
-
-    static void descriptionChanged(sp_playlist *pl, const char *desc, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(desc);
-        Q_UNUSED(userdata);
-    }
-
-    static void imageChanged(sp_playlist *pl, const byte *image, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(image);
-        Q_UNUSED(userdata);
-    }
-#endif
-
-#if SPOTIFY_API_VERSION >= 10
-    static void trackMessageChanged(sp_playlist *pl, int position, const char *message, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(position);
-        Q_UNUSED(message);
-        Q_UNUSED(userdata);
-    }
-
-    static void subscribersChanged(sp_playlist *pl, void *userdata)
-    {
-        Q_UNUSED(pl);
-        Q_UNUSED(userdata);
-    }
-#endif
-
-    static sp_playlist_callbacks spotifyCallbacks = {
-        &SpotifyPlaylists::tracksAdded,
-        &SpotifyPlaylists::tracksRemoved,
-        &SpotifyPlaylists::tracksMoved,
-        &SpotifyPlaylists::playlistRenamed,
-        &SpotifyPlaylists::playlistStateChanged,
-        &SpotifyPlaylists::playlistUpdateInProgress,
-        &SpotifyPlaylists::playlistMetadataUpdated
-#if SPOTIFY_API_VERSION > 4
-        , &SpotifyPlaylists::trackCreatedChanged,
-        &SpotifyPlaylists::trackSeenChanged,
-        &SpotifyPlaylists::descriptionChanged,
-        &SpotifyPlaylists::imageChanged
-#endif
-#if SPOTIFY_API_VERSION >= 10
-        , &SpotifyPlaylists::trackMessageChanged,
-        &SpotifyPlaylists::subscribersChanged
-#endif
-    };
-
-}
-//END: SpotifyPlaylists - application bridge
-
 //BEGIN: SpotifyImage - application bridge
 namespace SpotifyImage {
 
@@ -507,6 +377,13 @@ void MainWindow::spotifyLoggedOut()
     m_logout->setEnabled(true);
 }
 
+void MainWindow::playlistNeedsReload() {
+    Playlist *playlist = dynamic_cast<Playlist*>(sender());
+
+    MainWidget::Collection &c = MainWindow::self()->mainWidget()->collection(playlist->native());
+    c.needsToBeFilled = true;
+}
+
 void MainWindow::spotifyPlayTokenLost()
 {
     KMessageBox::sorry(this, i18n("Music is being played with this account at other client"), i18n("Account already being used"));
@@ -624,13 +501,14 @@ void MainWindow::fillPlaylistModel()
             currRow = 0;
         }
 
-        sp_playlist_add_callbacks(pl->native(), &SpotifyPlaylists::spotifyCallbacks, NULL);
+        connect(pl, SIGNAL(tracksAdded()), this, SLOT(playlistNeedsReload()), Qt::UniqueConnection);
+        connect(pl, SIGNAL(tracksRemoved()), this, SLOT(playlistNeedsReload()), Qt::UniqueConnection);
+        connect(pl, SIGNAL(tracksMoved()), this, SLOT(playlistNeedsReload()), Qt::UniqueConnection);
+        connect(pl, SIGNAL(playlistRenamed()), this, SLOT(fillPlaylistModel()), Qt::UniqueConnection);
         const QModelIndex &index = m_playlistModel->index(0);
         m_playlistModel->setData(index, QChar(0x2605) + i18n("Starred tracks"));
         m_playlistModel->setData(index, QVariant::fromValue<Playlist*>(pl), PlaylistModel::PlaylistRole);
     }
-    
-    static QList<sp_playlist*> playlistsWithCallbacksSet;
 
     int i = 1;
     foreach (Playlist *pl, playLists) {
@@ -638,10 +516,10 @@ void MainWindow::fillPlaylistModel()
             currRow = i;
         }
 
-        if (!playlistsWithCallbacksSet.contains(pl->native())) {
-            playlistsWithCallbacksSet.append(pl->native());
-            sp_playlist_add_callbacks(pl->native(), &SpotifyPlaylists::spotifyCallbacks, NULL);
-        }
+        connect(pl, SIGNAL(tracksAdded()), this, SLOT(playlistNeedsReload()), Qt::UniqueConnection);
+        connect(pl, SIGNAL(tracksRemoved()), this, SLOT(playlistNeedsReload()), Qt::UniqueConnection);
+        connect(pl, SIGNAL(tracksMoved()), this, SLOT(playlistNeedsReload()), Qt::UniqueConnection);
+        connect(pl, SIGNAL(playlistRenamed()), this, SLOT(fillPlaylistModel()), Qt::UniqueConnection);
 
         const QModelIndex &index = m_playlistModel->index(i);
         m_playlistModel->setData(index, pl->name());

@@ -110,9 +110,8 @@ Error Session::logout() {
 
 Error Session::destroy() {
     if (isInitialized()) {
-        sp_session_release(session());
-
         SessionMaster::destroy(session());
+        sp_session_release(session());
 
         m_session = 0;
     }
