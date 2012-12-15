@@ -30,6 +30,11 @@ public:
      */
     int duration() const;
 
+    /**
+     * Popularity from 0 to 100.
+     */
+    int popularity() const;
+
     sp_track* native() const;
 
 private:

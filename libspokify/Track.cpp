@@ -37,6 +37,14 @@ int TrackPrivate::duration() const {
     return dur;
 }
 
+int TrackPrivate::popularity() const {
+    int pop = 0;
+    if (isValid()) {
+        pop = sp_track_popularity(m_native);
+    }
+    return pop;
+}
+
 
 
 Track::Track() :
@@ -80,6 +88,11 @@ QString Track::name() const {
 int Track::duration() const {
     Q_D(const Track);
     return d->duration();
+}
+
+int Track::popularity() const {
+    Q_D(const Track);
+    return d->popularity();
 }
 
 sp_track* Track::native() const {

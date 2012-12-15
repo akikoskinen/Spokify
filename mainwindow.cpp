@@ -822,7 +822,7 @@ void MainWindow::searchResults(libspokify::SearchResults *results)
         }
         {
             const QModelIndex &index = trackModel->index(i, TrackModel::Popularity);
-            trackModel->setData(index, sp_track_popularity(tr));
+            trackModel->setData(index, track.popularity());
         }
         {
             const QModelIndex &index = trackModel->index(i, TrackModel::TrackRole);
@@ -896,7 +896,7 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
             }
             {
                 const QModelIndex &index = trackModel->index(i, TrackModel::Popularity);
-                trackModel->setData(index, sp_track_popularity(tr));
+                trackModel->setData(index, track.popularity());
             }
             {
                 const QModelIndex &index = trackModel->index(i, TrackModel::TrackRole);

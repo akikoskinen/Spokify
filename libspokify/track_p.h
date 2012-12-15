@@ -19,6 +19,8 @@ public:
 
     int duration() const;
 
+    int popularity() const;
+
     sp_track *m_native;
 };
 
