@@ -4,6 +4,7 @@
 #include <QMap>
 
 #include "spokifyconstructor.h"
+#include "Playlist.h"
 
 static QMap<sp_playlistcontainer*, libspokify::SpokifyPlaylistContainer*> SpokifyPlaylistContainers;
 
