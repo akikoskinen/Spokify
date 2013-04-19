@@ -148,7 +148,7 @@ void SessionMaster::notifyLoggedIn(const Error &error) {
     if (m_playlistContainer == 0) {
         sp_playlistcontainer *plc = sp_session_playlistcontainer(m_session);
         if (plc != 0) {
-            m_playlistContainer = new SpokifyPlaylistContainer(plc, this);
+            m_playlistContainer = SpokifyConstructor::newPlaylistContainer(plc, this);
         }
     }
 

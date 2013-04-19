@@ -1,33 +1,30 @@
 #ifndef LIBSPOKIFY_PLAYLISTCONTAINER_H
 #define LIBSPOKIFY_PLAYLISTCONTAINER_H
 
-#include <QObject>
+#include <QSharedPointer>
 
 namespace libspokify {
 
 class Playlist;
+class PlaylistContainerPrivate;
 
 class PlaylistContainer : public QObject {
     Q_OBJECT
 
 public:
-    explicit PlaylistContainer(QObject *parent = 0);
-
-    virtual ~PlaylistContainer();
-
     /**
      * Adds a new playlist to the playlist container.
      * Returns \c true if the addition was successful, \c false if not.
      */
-    virtual bool addPlaylist(QString playlistName) = 0;
+    bool addPlaylist(QString playlistName);
 
     /**
      * Removes a playlist at \a index.
      * Returns \c true if the removal was successful, \c false if not.
      */
-    virtual bool removePlaylist(int index) = 0;
+    bool removePlaylist(int index);
 
-    virtual QList<Playlist*> playlists() const;
+    QList<Playlist*> playlists() const;
 
 Q_SIGNALS:
     void playlistAdded();
@@ -35,9 +32,14 @@ Q_SIGNALS:
     void playlistMoved();
     void containerLoaded();
 
-protected:
-    QList<Playlist*> m_playlists;
+private:
+    explicit PlaylistContainer(PlaylistContainerPrivate &p, QObject *parent = 0);
 
+    QSharedPointer<PlaylistContainerPrivate> d_ptr;
+    Q_DECLARE_PRIVATE(PlaylistContainer)
+    Q_DISABLE_COPY(PlaylistContainer)
+
+    friend class SpokifyConstructor;
 };
 
 }
