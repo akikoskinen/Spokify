@@ -65,6 +65,10 @@ PlaylistPrivate::~PlaylistPrivate() {
     sp_playlist_remove_callbacks(m_native, &callbacks, this);
 }
 
+bool PlaylistPrivate::operator==(const PlaylistPrivate &other) const {
+    return m_native == other.m_native;
+}
+
 QString PlaylistPrivate::name() const {
     return QString::fromUtf8(sp_playlist_name(m_native));
 }
@@ -107,6 +111,11 @@ Playlist::Playlist(PlaylistPrivate &p, QObject *parent) :
 }
 
 Playlist::~Playlist() {
+}
+
+bool Playlist::operator==(const Playlist &other) const {
+    Q_D(const Playlist);
+    return *d == *other.d_ptr;
 }
 
 QString Playlist::name() const {

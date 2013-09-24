@@ -18,6 +18,8 @@ class Playlist : public QObject {
 public:
     virtual ~Playlist();
 
+    bool operator==(const Playlist &other) const;
+
     QString name() const;
 
     void rename(QString newName);

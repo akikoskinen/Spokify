@@ -15,6 +15,8 @@ public:
     PlaylistPrivate(sp_playlist *native);
     ~PlaylistPrivate();
 
+    bool operator==(const PlaylistPrivate &other) const;
+
     QString name() const;
     void rename(QString newName);
     QList<Track> tracks() const;

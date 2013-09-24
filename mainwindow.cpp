@@ -497,7 +497,7 @@ void MainWindow::fillPlaylistModel()
     {
         Playlist *pl = m_session->starredPlaylist();
         Q_ASSERT(pl);
-        if (pl->native() == m_currentPlaylist) {
+        if (!m_currentPlaylist.isNull() && *pl == *m_currentPlaylist) {
             currRow = 0;
         }
 
@@ -512,7 +512,7 @@ void MainWindow::fillPlaylistModel()
 
     int i = 1;
     foreach (Playlist *pl, playLists) {
-        if (pl->native() == m_currentPlaylist) {
+        if (!m_currentPlaylist.isNull() && *pl == *m_currentPlaylist) {
             currRow = i;
         }
 
@@ -733,7 +733,7 @@ void MainWindow::playlistChanged(const QItemSelection &selection)
 
     Playlist* curr = index.data(PlaylistModel::PlaylistRole).value<Playlist*>();
     MainWidget::Collection &c = m_mainWidget->collection(curr->native());
-    m_currentPlaylist = curr->native();
+    m_currentPlaylist = curr;
     if (c.needsToBeFilled) {
         c.needsToBeFilled = false;
         TrackModel *const trackModel = c.trackModel;

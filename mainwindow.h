@@ -30,15 +30,13 @@
 #include <QtCore/QBuffer>
 #include <QtCore/QModelIndex>
 #include <QtCore/QWaitCondition>
+#include <QtCore/QPointer>
 
 #include <QtGui/QItemSelection>
 
 #include <alsa/asoundlib.h>
 
 #include "appkey.h"
-
-struct sp_playlist;
-struct sp_track;
 
 class QMovie;
 class QLabel;
@@ -65,6 +63,7 @@ namespace libspokify {
 class Session;
 class Error;
 class Track;
+class Playlist;
 class SearchResults;
 }
 
@@ -183,7 +182,7 @@ private:
 
     libspokify::Session  *m_session;
 
-    sp_playlist          *m_currentPlaylist;
+    QPointer<libspokify::Playlist> m_currentPlaylist;
 
     KAction              *m_login;
     KAction              *m_logout;
