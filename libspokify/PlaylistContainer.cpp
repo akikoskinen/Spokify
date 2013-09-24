@@ -2,6 +2,7 @@
 #include "playlistcontainer_p.h"
 #include "Playlist.h"
 #include "spokifyconstructor.h"
+#include "nativehelper.h"
 
 #include <QMap>
 #include <libspotify/api.h>
@@ -79,15 +80,31 @@ QList<Playlist*> PlaylistContainerPrivate::playlists() const {
 void PlaylistContainerPrivate::updatePlaylists() {
     int numPlaylists = sp_playlistcontainer_num_playlists(m_nativeContainer);
 
-    qDeleteAll(m_playlists);
+    QList<Playlist*> oldPlaylists = m_playlists;
     m_playlists.clear();
     m_playlists.reserve(numPlaylists);
-    // Collect the playlists that are of type "playlist", discard others
     for (int i = 0; i < numPlaylists; ++i) {
+        // Collect the playlists that are of type "playlist", discard others
         if (sp_playlistcontainer_playlist_type(m_nativeContainer, i) == SP_PLAYLIST_TYPE_PLAYLIST) {
-            m_playlists.append(SpokifyConstructor::newPlaylist(sp_playlistcontainer_playlist(m_nativeContainer, i)));
+            Playlist *playlist = NULL;
+            sp_playlist *native_playlist = sp_playlistcontainer_playlist(m_nativeContainer, i);
+            foreach (Playlist *pl, oldPlaylists) {
+                if (NativeHelper::PlaylistNativeIs(pl, native_playlist)) {
+                    playlist = pl;
+                    oldPlaylists.removeAll(pl);
+                    break;
+                }
+            }
+
+            if (playlist == NULL) {
+                playlist = SpokifyConstructor::newPlaylist(native_playlist);
+            }
+
+            m_playlists.append(playlist);
         }
     }
+
+    qDeleteAll(oldPlaylists);
 }
 
 void PlaylistContainerPrivate::notifyPlaylistAdded() {

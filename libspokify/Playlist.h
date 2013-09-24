@@ -42,7 +42,7 @@ private:
     Q_DISABLE_COPY(Playlist)
 
     friend class SpokifyConstructor;
-
+    friend class NativeHelper;
 };
 
 }
