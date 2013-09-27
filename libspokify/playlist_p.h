@@ -28,12 +28,17 @@ public:
     void notifyTracksMoved();
     void notifyPlaylistRenamed();
 
-    Playlist *q_ptr;
-    sp_playlist *m_native;
-    sp_session *m_session;
-    QList<Track> m_tracks;
+    sp_playlist* const m_native;
 
     Q_DECLARE_PUBLIC(Playlist)
+
+private:
+    Playlist *q_ptr;
+    sp_session *m_session;
+    mutable QList<Track> m_tracks;
+
+    void setTracksDirty();
+    void ensureTracks() const;
 };
 
 }

@@ -55,11 +55,6 @@ PlaylistPrivate::PlaylistPrivate(sp_playlist *native, sp_session *session) :
     callbacks.tracks_moved = &cbTracksMoved;
     callbacks.playlist_renamed = &cbPlaylistRenamed;
     sp_playlist_add_callbacks(m_native, &callbacks, this);
-
-    const int numTracks = sp_playlist_num_tracks(m_native);
-    for (int i = 0; i < numTracks; ++i) {
-        m_tracks.append(SpokifyConstructor::newTrack(sp_playlist_track(m_native, i)));
-    }
 }
 
 PlaylistPrivate::~PlaylistPrivate() {
@@ -79,6 +74,7 @@ void PlaylistPrivate::rename(QString newName) {
 }
 
 QList<Track> PlaylistPrivate::tracks() const {
+    ensureTracks();
     return m_tracks;
 }
 
@@ -88,16 +84,22 @@ void PlaylistPrivate::addTrack(const Track &track) {
 }
 
 void PlaylistPrivate::notifyTracksAdded() {
+    setTracksDirty();
+
     Q_Q(Playlist);
     emit q->tracksAdded();
 }
 
 void PlaylistPrivate::notifyTracksRemoved() {
+    setTracksDirty();
+
     Q_Q(Playlist);
     emit q->tracksRemoved();
 }
 
 void PlaylistPrivate::notifyTracksMoved() {
+    setTracksDirty();
+
     Q_Q(Playlist);
     emit q->tracksMoved();
 }
@@ -105,6 +107,19 @@ void PlaylistPrivate::notifyTracksMoved() {
 void PlaylistPrivate::notifyPlaylistRenamed() {
     Q_Q(Playlist);
     emit q->playlistRenamed();
+}
+
+void PlaylistPrivate::setTracksDirty() {
+    m_tracks.clear();
+}
+
+void PlaylistPrivate::ensureTracks() const {
+    if (m_tracks.isEmpty()) {
+        const int numTracks = sp_playlist_num_tracks(m_native);
+        for (int i = 0; i < numTracks; ++i) {
+            m_tracks.append(SpokifyConstructor::newTrack(sp_playlist_track(m_native, i)));
+        }
+    }
 }
 
 
