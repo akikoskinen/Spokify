@@ -9,12 +9,12 @@
 
 namespace libspokify {
 
-PlaylistContainer* SpokifyConstructor::newPlaylistContainer(sp_playlistcontainer *plc, QObject *parent) {
-    return new PlaylistContainer(*new PlaylistContainerPrivate(plc), parent);
+PlaylistContainer* SpokifyConstructor::newPlaylistContainer(sp_playlistcontainer *plc, sp_session *session, QObject *parent) {
+    return new PlaylistContainer(*new PlaylistContainerPrivate(plc, session), parent);
 }
 
-Playlist* SpokifyConstructor::newPlaylist(sp_playlist *playlist, QObject *parent) {
-    return new Playlist(*new PlaylistPrivate(playlist), parent);
+Playlist* SpokifyConstructor::newPlaylist(sp_playlist *playlist, sp_session *session, QObject *parent) {
+    return new Playlist(*new PlaylistPrivate(playlist, session), parent);
 }
 
 Track SpokifyConstructor::newTrack(sp_track *track) {

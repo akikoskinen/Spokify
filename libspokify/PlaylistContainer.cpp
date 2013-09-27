@@ -50,8 +50,9 @@ void cbContainerLoaded(sp_playlistcontainer *pc, void *userdata) {
 
 namespace libspokify {
 
-PlaylistContainerPrivate::PlaylistContainerPrivate(sp_playlistcontainer *plc) :
-    m_nativeContainer(plc)
+PlaylistContainerPrivate::PlaylistContainerPrivate(sp_playlistcontainer *plc, sp_session *session) :
+    m_nativeContainer(plc),
+    m_session(session)
 {
     Q_ASSERT(m_nativeContainer != 0);
 
@@ -97,7 +98,7 @@ void PlaylistContainerPrivate::updatePlaylists() {
             }
 
             if (playlist == NULL) {
-                playlist = SpokifyConstructor::newPlaylist(native_playlist);
+                playlist = SpokifyConstructor::newPlaylist(native_playlist, m_session);
             }
 
             m_playlists.append(playlist);

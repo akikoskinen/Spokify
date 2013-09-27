@@ -46,8 +46,9 @@ static sp_playlist_callbacks callbacks;
 namespace libspokify {
 
 
-PlaylistPrivate::PlaylistPrivate(sp_playlist *native) :
-    m_native(native)
+PlaylistPrivate::PlaylistPrivate(sp_playlist *native, sp_session *session) :
+    m_native(native),
+    m_session(session)
 {
     callbacks.tracks_added = &cbTracksAdded;
     callbacks.tracks_removed = &cbTracksRemoved;
@@ -79,6 +80,11 @@ void PlaylistPrivate::rename(QString newName) {
 
 QList<Track> PlaylistPrivate::tracks() const {
     return m_tracks;
+}
+
+void PlaylistPrivate::addTrack(const Track &track) {
+    sp_track* const trackToAdd[] = { track.native() };
+    sp_playlist_add_tracks(m_native, trackToAdd, 1, sp_playlist_num_tracks(m_native), m_session);
 }
 
 void PlaylistPrivate::notifyTracksAdded() {
@@ -131,6 +137,11 @@ void Playlist::rename(QString newName) {
 QList<Track> Playlist::tracks() const {
     Q_D(const Playlist);
     return d->tracks();
+}
+
+void Playlist::addTrack(const Track &track) {
+    Q_D(Playlist);
+    d->addTrack(track);
 }
 
 sp_playlist* Playlist::native() const {

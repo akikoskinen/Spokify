@@ -4,6 +4,7 @@
 #include <QList>
 
 struct sp_playlistcontainer;
+struct sp_session;
 
 namespace libspokify {
 
@@ -12,7 +13,7 @@ class Playlist;
 
 class PlaylistContainerPrivate {
 public:
-    PlaylistContainerPrivate(sp_playlistcontainer *plc);
+    PlaylistContainerPrivate(sp_playlistcontainer *plc, sp_session *session);
     ~PlaylistContainerPrivate();
 
     bool addPlaylist(QString playlistName);
@@ -27,6 +28,7 @@ public:
 
     PlaylistContainer *q_ptr;
     sp_playlistcontainer *m_nativeContainer;
+    sp_session *m_session;
     QList<Playlist*> m_playlists;
 
     Q_DECLARE_PUBLIC(PlaylistContainer)

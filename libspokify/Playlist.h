@@ -26,6 +26,8 @@ public:
 
     QList<Track> tracks() const;
 
+    void addTrack(const Track &track);
+
     // TODO remove this from the public interface when it's not needed anymore
     sp_playlist* native() const;
 

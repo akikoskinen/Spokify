@@ -19,12 +19,9 @@
 #include "playlistview.h"
 #include "mimedata.h"
 #include "playlistmodel.h"
-#include "libspokify/Session.h"
 #include "libspokify/PlaylistContainer.h"
 #include "libspokify/Playlist.h"
 #include "libspokify/Track.h"
-
-#include <libspotify/api.h>
 
 #include <QtGui/QLabel>
 #include <QtGui/QBoxLayout>
@@ -85,13 +82,11 @@ void PlaylistView::dragMoveEvent(QDragMoveEvent *event)
 void PlaylistView::dropEvent(QDropEvent *event)
 {
     const QModelIndex target = indexAt(event->pos());
-    if (!target.isValid()) {
-        return;
+    if (target.isValid()) {
+        const MimeData *mimeData = static_cast<const MimeData*>(event->mimeData());
+        Playlist* targetPlaylist = target.data(PlaylistModel::PlaylistRole).value<Playlist*>();
+        targetPlaylist->addTrack(mimeData->track());
     }
-    const MimeData *mimeData = static_cast<const MimeData*>(event->mimeData());
-    sp_track* const trackToAdd[] = { mimeData->track().native() };
-    sp_playlist *targetPlaylist = target.data(PlaylistModel::PlaylistRole).value<Playlist*>()->native();
-    sp_playlist_add_tracks(targetPlaylist, trackToAdd, 1, sp_playlist_num_tracks(targetPlaylist), Session().session());
 }
 
 void PlaylistView::contextMenuEvent(QContextMenuEvent *event)

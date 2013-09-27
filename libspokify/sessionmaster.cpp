@@ -129,7 +129,7 @@ Playlist* SessionMaster::starredPlaylist() const {
     if (m_starredPlaylist == 0) {
         sp_playlist *starred = sp_session_starred_create(m_session);
         if (starred != 0) {
-            m_starredPlaylist = SpokifyConstructor::newPlaylist(starred, const_cast<SessionMaster*>(this));
+            m_starredPlaylist = SpokifyConstructor::newPlaylist(starred, m_session, const_cast<SessionMaster*>(this));
         }
     }
 
@@ -148,7 +148,7 @@ void SessionMaster::notifyLoggedIn(const Error &error) {
     if (m_playlistContainer == 0) {
         sp_playlistcontainer *plc = sp_session_playlistcontainer(m_session);
         if (plc != 0) {
-            m_playlistContainer = SpokifyConstructor::newPlaylistContainer(plc, this);
+            m_playlistContainer = SpokifyConstructor::newPlaylistContainer(plc, m_session, this);
         }
     }
 
